@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAPHY106 — Foundations of Quantum Mechanics</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --card: #16161f;
+  --border: #2a2a3a;
+  --accent: #7c6aff;
+  --accent2: #ff6b6b;
+  --accent3: #44e5b4;
+  --accent4: #ffc947;
+  --text: #e8e8f0;
+  --muted: #8888aa;
+  --dim: #55556a;
+  --glow: rgba(124,106,255,0.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Serif', Georgia, serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* GRID NOISE BACKGROUND */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(124,106,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,106,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+
+/* HEADER */
+header {
+  padding: 48px 0 40px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 48px;
+}
+
+.header-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-tag::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -1.5px;
+  background: linear-gradient(135deg, #fff 0%, #b8b0ff 60%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 12px;
+  line-height: 1.8;
+}
+
+.progress-bar-wrap { margin-top: 28px; display: flex; align-items: center; gap: 16px; }
+.progress-label { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.progress-track { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 2px; transition: width 0.6s ease; width: 0%; }
+.progress-pct { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--accent); min-width: 36px; }
+
+/* MODULE GRID */
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.module-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+  position: relative;
+}
+.module-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 32px var(--glow);
+  transform: translateY(-2px);
+}
+.module-card.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 40px var(--glow);
+}
+
+.module-header {
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.module-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(124,106,255,0.1);
+  border: 1px solid rgba(124,106,255,0.2);
+  border-radius: 6px;
+  padding: 4px 10px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.module-info { flex: 1; }
+
+.module-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.module-meta {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+  display: flex;
+  gap: 12px;
+}
+
+.module-chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--dim);
+  transition: transform 0.3s, color 0.3s;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.module-card.active .module-chevron { transform: rotate(90deg); color: var(--accent); }
+
+.module-topics {
+  display: none;
+  padding: 0 24px 20px;
+  border-top: 1px solid var(--border);
+}
+.module-card.active .module-topics { display: block; }
+
+.topic-list { list-style: none; padding-top: 16px; }
+.topic-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+.topic-item:hover { background: rgba(124,106,255,0.08); color: var(--text); }
+.topic-item.studied { color: var(--accent3); }
+
+.topic-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.topic-item:hover .topic-dot { background: var(--accent); }
+.topic-item.studied .topic-dot { background: var(--accent3); }
+.topic-arrow { margin-left: auto; opacity: 0; transition: opacity 0.2s; }
+.topic-item:hover .topic-arrow { opacity: 1; }
+
+/* CONTENT PANEL */
+#content-panel {
+  display: none;
+  animation: slideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+#content-panel.visible { display: block; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.content-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.btn-back {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--text); }
+
+.breadcrumb {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.breadcrumb .sep { color: var(--border); }
+.breadcrumb .current { color: var(--accent); }
+
+.btn-mark {
+  margin-left: auto;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  background: transparent;
+  border: 1px solid var(--accent3);
+  color: var(--accent3);
+  border-radius: 6px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-mark:hover { background: rgba(68,229,180,0.1); }
+.btn-mark.marked { background: rgba(68,229,180,0.15); }
+
+/* CONTENT BODY */
+.content-body { max-width: 780px; }
+
+.content-title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.content-subtitle {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.content-section {
+  margin-bottom: 36px;
+}
+
+.section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-label::after { content: ''; flex: 0 0 32px; height: 1px; background: var(--border); }
+
+.prose {
+  font-size: 16px;
+  line-height: 1.85;
+  color: #cccce0;
+  font-family: 'IBM Plex Serif', serif;
+}
+.prose p { margin-bottom: 16px; }
+.prose strong { color: var(--text); font-weight: 500; }
+.prose em { color: var(--accent4); font-style: italic; }
+
+/* FORMULA BOX */
+.formula-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin: 20px 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  color: var(--accent);
+  overflow-x: auto;
+}
+.formula-box .formula-label {
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* KEY POINTS */
+.key-points {
+  background: rgba(124,106,255,0.05);
+  border: 1px solid rgba(124,106,255,0.15);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin: 24px 0;
+}
+.key-points h4 {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.key-points ul { list-style: none; }
+.key-points li {
+  display: flex;
+  gap: 10px;
+  color: #bbbbd0;
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 8px;
+  font-family: 'IBM Plex Serif', serif;
+}
+.key-points li::before { content: '→'; color: var(--accent); font-family: 'Space Mono', monospace; flex-shrink: 0; }
+
+/* CALLOUT */
+.callout {
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 20px 0;
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.7;
+  font-family: 'IBM Plex Serif', serif;
+}
+.callout.info { background: rgba(68,229,180,0.06); border: 1px solid rgba(68,229,180,0.2); color: #a0f0d0; }
+.callout.warn { background: rgba(255,201,71,0.06); border: 1px solid rgba(255,201,71,0.2); color: #f0d0a0; }
+.callout.note { background: rgba(255,107,107,0.06); border: 1px solid rgba(255,107,107,0.2); color: #f0a0a0; }
+.callout-icon { flex-shrink: 0; font-size: 16px; }
+
+/* DIVIDER */
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 40px 0;
+}
+
+/* QUESTIONS */
+.questions-header {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.questions-header span {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--accent2);
+  background: rgba(255,107,107,0.1);
+  border: 1px solid rgba(255,107,107,0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+.question-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.question-card:hover { border-color: rgba(255,107,107,0.3); }
+
+.question-body {
+  padding: 20px 24px;
+}
+.q-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--accent2);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+.q-text {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text);
+  font-family: 'IBM Plex Serif', serif;
+}
+
+.btn-show-answer {
+  display: block;
+  width: 100%;
+  padding: 14px 24px;
+  background: var(--surface);
+  border: none;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+}
+.btn-show-answer:hover { background: rgba(255,107,107,0.06); color: var(--accent2); }
+.btn-show-answer.revealed { color: var(--accent2); }
+
+.answer-panel {
+  display: none;
+  padding: 20px 24px;
+  background: rgba(255,107,107,0.04);
+  border-top: 1px solid rgba(255,107,107,0.15);
+  font-size: 14px;
+  line-height: 1.85;
+  color: #d0d0e8;
+  font-family: 'IBM Plex Serif', serif;
+}
+.answer-panel.visible { display: block; animation: fadeIn 0.25s ease; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.answer-panel .ans-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--accent2);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.answer-panel p { margin-bottom: 10px; }
+.answer-panel strong { color: #fff; }
+
+.answer-formula {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  background: rgba(0,0,0,0.3);
+  border-left: 2px solid var(--accent2);
+  padding: 10px 16px;
+  margin: 12px 0;
+  color: #ffaaaa;
+  border-radius: 0 6px 6px 0;
+}
+
+/* NAV BETWEEN TOPICS */
+.topic-nav {
+  display: flex;
+  gap: 12px;
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+}
+.btn-topic-nav {
+  flex: 1;
+  padding: 16px 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-family: 'Space Mono', monospace;
+}
+.btn-topic-nav:hover { border-color: var(--accent); }
+.btn-topic-nav .nav-dir { font-size: 10px; color: var(--dim); letter-spacing: 2px; margin-bottom: 6px; }
+.btn-topic-nav .nav-title { font-size: 12px; color: var(--text); line-height: 1.4; }
+.btn-topic-nav.next { text-align: right; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* SELECTION */
+::selection { background: rgba(124,106,255,0.3); }
+
+/* RESPONSIVE */
+@media (max-width: 640px) {
+  .modules-grid { grid-template-columns: 1fr; }
+  .topic-nav { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="header-tag">BAPHY106 · VIT Chennai · 2025–2029</div>
+    <h1>Foundations of<br>Quantum Mechanics</h1>
+    <p class="subtitle">5 Modules · 43 Topics · Complete Study Guide</p>
+    <div class="progress-bar-wrap">
+      <span class="progress-label">PROGRESS</span>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <span class="progress-pct" id="progressPct">0%</span>
+    </div>
+  </header>
+
+  <!-- MODULE LIST -->
+  <div id="home-view">
+    <div class="modules-grid" id="modulesGrid"></div>
+  </div>
+
+  <!-- CONTENT PANEL -->
+  <div id="content-panel">
+    <div class="content-nav">
+      <button class="btn-back" onclick="goHome()">← Modules</button>
+      <div class="breadcrumb" id="breadcrumb"></div>
+      <button class="btn-mark" id="markBtn" onclick="toggleStudied()">✓ Mark studied</button>
+    </div>
+    <div class="content-body" id="contentBody"></div>
+  </div>
+</div>
+
+<script>
+/* ===================== DATA ===================== */
+const MODULES = [
+  {
+    id: 1,
+    title: "Wave-Particle Duality",
+    hours: "9 hrs",
+    accent: "#7c6aff",
+    topics: [
+      { id: "1-1", title: "Limitations of Classical Physics", content: content_1_1 },
+      { id: "1-2", title: "Blackbody Radiation & Planck's Hypothesis", content: content_1_2 },
+      { id: "1-3", title: "Photoelectric Effect", content: content_1_3 },
+      { id: "1-4", title: "Compton Effect", content: content_1_4 },
+      { id: "1-5", title: "de Broglie Hypothesis & Matter Waves", content: content_1_5 },
+      { id: "1-6", title: "Wave Function & Born's Interpretation", content: content_1_6 },
+      { id: "1-7", title: "Heisenberg Uncertainty Principle", content: content_1_7 },
+      { id: "1-8", title: "Stern-Gerlach Experiment", content: content_1_8 },
+    ]
+  },
+  {
+    id: 2,
+    title: "Mathematical Foundations of QM",
+    hours: "10 hrs",
+    accent: "#ff6b6b",
+    topics: [
+      { id: "2-1", title: "Linear Vector Space & Basis", content: content_2_1 },
+      { id: "2-2", title: "Hilbert Space & Inner Product", content: content_2_2 },
+      { id: "2-3", title: "Dirac Notation (Bra-Ket)", content: content_2_3 },
+      { id: "2-4", title: "Linear Operators & Matrix Algebra", content: content_2_4 },
+      { id: "2-5", title: "Hermitian, Unitary & Projection Operators", content: content_2_5 },
+      { id: "2-6", title: "Eigenvalues & Eigenvectors", content: content_2_6 },
+      { id: "2-7", title: "Pauli Matrices & Applications", content: content_2_7 },
+      { id: "2-8", title: "Commutation Relations", content: content_2_8 },
+    ]
+  },
+  {
+    id: 3,
+    title: "Postulates of Quantum Mechanics",
+    hours: "7 hrs",
+    accent: "#44e5b4",
+    topics: [
+      { id: "3-1", title: "State Vector Representation", content: content_3_1 },
+      { id: "3-2", title: "Measurement Postulate & Observables", content: content_3_2 },
+      { id: "3-3", title: "Expectation Values", content: content_3_3 },
+      { id: "3-4", title: "Schrödinger Wave Equation (Derivation)", content: content_3_4 },
+      { id: "3-5", title: "Time-Independent Schrödinger Equation", content: content_3_5 },
+      { id: "3-6", title: "Time-Dependent Schrödinger Equation", content: content_3_6 },
+    ]
+  },
+  {
+    id: 4,
+    title: "Applications of Quantum Mechanics",
+    hours: "7 hrs",
+    accent: "#ffc947",
+    topics: [
+      { id: "4-1", title: "Particle in a 1-D Box", content: content_4_1 },
+      { id: "4-2", title: "Eigenfunction & Energy Quantization", content: content_4_2 },
+      { id: "4-3", title: "Zero Point Energy & Probability Density", content: content_4_3 },
+      { id: "4-4", title: "Particle in a 3-D Box & Degeneracy", content: content_4_4 },
+      { id: "4-5", title: "Quantum Tunneling", content: content_4_5 },
+      { id: "4-6", title: "Scanning Tunnelling Microscope (STM)", content: content_4_6 },
+    ]
+  },
+  {
+    id: 5,
+    title: "Elements of Quantum Computing",
+    hours: "10 hrs",
+    accent: "#b06eff",
+    topics: [
+      { id: "5-1", title: "Introduction & Classical vs Quantum Bits", content: content_5_1 },
+      { id: "5-2", title: "Single Qubit & Bloch Sphere", content: content_5_2 },
+      { id: "5-3", title: "Two Qubits & Entanglement", content: content_5_3 },
+      { id: "5-4", title: "Bell States", content: content_5_4 },
+      { id: "5-5", title: "Single Qubit Gates (Pauli, Hadamard)", content: content_5_5 },
+      { id: "5-6", title: "Two Qubit Gates & CNOT", content: content_5_6 },
+    ]
+  }
+];
+
+/* ===================== CONTENT FUNCTIONS ===================== */
+function makeSection(label, html) {
+  return `<div class="content-section"><div class="section-label">${label}</div><div class="prose">${html}</div></div>`;
+}
+function makeFormula(label, formula) {
+  return `<div class="formula-box"><div class="formula-label">${label}</div>${formula}</div>`;
+}
+function makeKeyPoints(points) {
+  return `<div class="key-points"><h4>Key Points</h4><ul>${points.map(p=>`<li>${p}</li>`).join('')}</ul></div>`;
+}
+function makeCallout(type, icon, text) {
+  return `<div class="callout ${type}"><span class="callout-icon">${icon}</span><span>${text}</span></div>`;
+}
+function makeQ(num, q, a) {
+  return `<div class="question-card">
+    <div class="question-body"><div class="q-num">Q${num}</div><div class="q-text">${q}</div></div>
+    <button class="btn-show-answer" onclick="toggleAnswer(this)">▶ Show Answer</button>
+    <div class="answer-panel"><div class="ans-label">Answer</div>${a}</div>
+  </div>`;
+}
+
+/* ===================== TOPIC CONTENT ===================== */
+
+/* --- MODULE 1 --- */
+function content_1_1() { return `
+<div class="content-title">Limitations of Classical Physics</div>
+<div class="content-subtitle">Module 1 · Wave-Particle Duality</div>
+${makeSection("Overview", `<p>Classical physics — built on Newton's mechanics and Maxwell's electromagnetic theory — was triumphant in explaining macroscopic phenomena. But by the late 19th century, it ran into a series of <strong>catastrophic failures</strong> at the atomic and subatomic scale.</p>`)}
+${makeSection("The Major Failures", `<p>Classical theory could <em>not</em> explain the following experimental observations:</p>`)}
+${makeKeyPoints([
+  "<strong>Blackbody Radiation:</strong> The Rayleigh–Jeans law predicted infinite energy at short wavelengths (UV catastrophe) — contradicting observation.",
+  "<strong>Discrete Atomic Spectra:</strong> Atoms emit light only at specific, sharp frequencies. Classical theory predicts continuous emission.",
+  "<strong>Photoelectric Effect:</strong> Light below a threshold frequency ejects no electrons, regardless of intensity — impossible classically.",
+  "<strong>Specific Heat of Metals:</strong> Classical equipartition theorem fails at low temperatures.",
+  "<strong>Stability of Atoms:</strong> A classically orbiting electron should radiate energy and spiral into the nucleus in ~10⁻⁸ s.",
+  "<strong>Compton & Raman Effects:</strong> Scattering experiments showed light behaves as discrete particles.",
+  "<strong>Zeeman Effect:</strong> Splitting of spectral lines in magnetic fields required quantum angular momentum."
+])}
+${makeCallout("warn", "⚠️", "<strong>The core problem:</strong> Classical physics assumes all physical quantities (energy, momentum, position) can take any continuous value. Quantum mechanics introduces the revolutionary idea that many quantities are <em>quantized</em> — they only take discrete values.")}
+${makeSection("Birth of Quantum Mechanics", `<p>The crises forced physicists to radically revise their understanding. Between 1900–1930, Planck, Einstein, Bohr, de Broglie, Heisenberg, Schrödinger, and Dirac built a completely new framework: <strong>Quantum Mechanics</strong>.</p>
+<p>Newton's laws of motion apply only to macroscopic particles. The Schrödinger equation, by contrast, works for <strong>both macroscopic and microscopic</strong> particles, reducing to classical results in the large-scale limit (Bohr's Correspondence Principle).</p>`)}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>5 Qs</span></div>
+${makeQ(1, "Why did classical physics fail to explain the stability of atoms?",
+  `<p>A classically orbiting electron undergoes centripetal acceleration. Any accelerating charge radiates electromagnetic energy (Larmor radiation). Therefore, the electron would continuously lose energy, causing it to spiral inward toward the nucleus. Classical calculations predict collapse within ~10⁻⁸ seconds. In reality, atoms are stable — classical physics simply cannot explain this. Quantum mechanics resolves it by quantizing electron orbits into allowed discrete energy levels.</p>`
+)}
+${makeQ(2, "List any four phenomena that classical physics failed to explain.",
+  `<p>Classical physics failed to explain:</p>
+  <p>1. <strong>Blackbody radiation</strong> — UV catastrophe predicted by Rayleigh–Jeans law.</p>
+  <p>2. <strong>Photoelectric effect</strong> — threshold frequency dependence cannot be explained by wave theory.</p>
+  <p>3. <strong>Discrete spectral lines of atoms</strong> — classical theory predicts continuous emission.</p>
+  <p>4. <strong>Compton effect</strong> — momentum transfer during X-ray scattering requires particle nature of light.</p>`
+)}
+${makeQ(3, "What is the fundamental difference between classical and quantum treatment of energy?",
+  `<p>In classical mechanics, energy is treated as a <strong>continuous variable</strong> — a particle or oscillator can have any arbitrary amount of energy. In quantum mechanics, energy is <strong>quantized</strong>: it can only take discrete values that are integer multiples of a fundamental quantum (hν for electromagnetic oscillators). This quantization condition, first proposed by Planck, was the revolutionary departure from classical thinking.</p>`
+)}
+${makeQ(4, "What is Bohr's Correspondence Principle?",
+  `<p>Bohr's Correspondence Principle states that in the limit of <strong>large quantum numbers</strong> (or equivalently, macroscopic scale), the predictions of quantum mechanics must agree with classical physics. This is because for very large systems, the discrete energy levels are so closely spaced that they appear continuous — just as classical physics assumes. The principle ensures that quantum mechanics doesn't contradict established classical results for everyday objects.</p>`
+)}
+${makeQ(5, "Why is Newton's law insufficient for microscopic particles?",
+  `<p>Newton's laws treat particles as having definite, simultaneously measurable positions and momenta. At the microscopic scale, the Heisenberg Uncertainty Principle (Δx·Δp ≥ ℏ/2) makes this impossible — you cannot precisely know both simultaneously. Additionally, microscopic particles exhibit <strong>wave-like behavior</strong> (diffraction, interference) that Newton's laws cannot describe. The Schrödinger equation replaces Newton's F = ma at the quantum level, naturally incorporating both the probabilistic nature and wave-particle duality.</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('1-2')"><div class="nav-dir">NEXT TOPIC</div><div class="nav-title">Blackbody Radiation & Planck's Hypothesis →</div></button>
+</div>
+`;}
+
+function content_1_2() { return `
+<div class="content-title">Blackbody Radiation & Planck's Hypothesis</div>
+<div class="content-subtitle">Module 1 · Wave-Particle Duality</div>
+${makeSection("What is a Blackbody?", `<p>A <strong>blackbody</strong> is a theoretical object that absorbs 100% of all incident radiation — it reflects nothing. Because it reflects nothing, it appears perfectly black at room temperature. A small hole cut into a hollow cavity is the best practical approximation.</p>
+<p><strong>Key fact:</strong> The emission spectrum of a blackbody depends <em>only on temperature</em>, not on the material. This makes it a universal standard for radiation laws.</p>`)}
+${makeKeyPoints([
+  "At room temperature (~300 K): emits in infrared — invisible to the eye, appears black.",
+  "At 600–700 K: begins to glow dull red.",
+  "At 1000 K: red glow. At 2000 K: yellow. At 3000 K: light yellow. At 6000 K: white (like the Sun).",
+  "The Sun (surface 5778 K) is a near-perfect blackbody — glowing white due to enormous temperature.",
+  "Peak wavelength shifts to shorter values as temperature increases (Wien's Displacement Law: λ_max·T = constant)."
+])}
+${makeSection("The UV Catastrophe", `<p>In the 19th century, two competing theories tried to explain blackbody spectra:</p>
+<p><strong>Wien's Law:</strong> Worked at short wavelengths, failed at long wavelengths.</p>
+<p><strong>Rayleigh–Jeans Law:</strong> Treated radiation as standing waves with energy kT per mode. It worked at long wavelengths but predicted energy → ∞ as wavelength → 0. This divergence was called the <em>Ultraviolet Catastrophe</em>.</p>`)}
+${makeFormula("Rayleigh–Jeans & Planck Distributions", `u_RJ(λ) = 8πk_BT / λ⁴  (fails at short λ)
+u_P(λ) = 8πhc / λ⁵ · 1/(exp(hc/λk_BT) − 1)  (correct for all λ)`)}
+${makeSection("Planck's Revolutionary Hypothesis (1900)", `<p>Max Planck solved the UV catastrophe with a bold assumption: electromagnetic oscillators in the cavity walls <strong>cannot emit or absorb energy continuously</strong>. Instead, energy is exchanged only in discrete packets called <strong>quanta</strong>:</p>`)}
+${makeFormula("Planck's Energy Quantization", `E = nhν    where n = 0, 1, 2, 3, ...
+h = 6.626 × 10⁻³⁴ J·s  (Planck's constant)
+ν = frequency of the oscillator`)}
+${makeCallout("info", "💡", "Planck's key insight: Higher frequency modes are exponentially suppressed because they require large quanta of energy — which are thermally unavailable. This kills the UV catastrophe naturally.")}
+${makeKeyPoints([
+  "Planck's formula perfectly fits experimental blackbody curves at ALL wavelengths.",
+  "The quantization of energy was the birth of quantum theory.",
+  "Wien's law is recovered at short wavelengths (hν >> k_BT).",
+  "Rayleigh–Jeans is recovered at long wavelengths (hν << k_BT, classical limit)."
+])}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>6 Qs</span></div>
+${makeQ(1, "What is a blackbody? Why is a small hole in a cavity a good approximation?",
+  `<p>A <strong>blackbody</strong> is an ideal object that absorbs all incident radiation (zero reflection). A small hole in a hollow cavity works as follows: radiation entering through the hole undergoes multiple reflections off the cavity walls, with a fraction absorbed each time. After many reflections, nearly 100% is absorbed — none escapes. The cavity thus acts as a near-perfect absorber, and any radiation emitted through the hole is pure thermal (blackbody) radiation determined solely by the cavity's temperature.</p>`
+)}
+${makeQ(2, "Explain the Ultraviolet Catastrophe.",
+  `<p>The Rayleigh–Jeans law derived the energy density of blackbody radiation by treating modes as classical oscillators, each with average energy k_BT. The formula u(λ) = 8πk_BT/λ⁴ works well at large wavelengths, but as λ → 0, u → ∞. This predicted that a blackbody would radiate infinite energy in the ultraviolet and shorter wavelength regions — an absurd result. This failure of classical theory was named the <strong>Ultraviolet Catastrophe</strong> and was one of the most serious crises in classical physics.</p>`
+)}
+${makeQ(3, "State Planck's hypothesis and write the energy quantization formula.",
+  `<p>Planck's Hypothesis (1900): The energy of electromagnetic oscillators in the blackbody cavity walls is not continuous but is restricted to discrete (quantized) values. An oscillator vibrating at frequency ν can only have energies:</p>
+  <div class="answer-formula">E_n = nhν,  n = 0, 1, 2, 3, ...</div>
+  <p>where h = 6.626 × 10⁻³⁴ J·s is Planck's constant. Oscillators can only emit or absorb energy in chunks of hν. This quantization condition eliminates the UV catastrophe because high-frequency modes (large hν) are exponentially unlikely to be excited at a given temperature.</p>`
+)}
+${makeQ(4, "Write Planck's radiation formula and show how it reduces to Rayleigh–Jeans at long wavelengths.",
+  `<p>Planck's formula for spectral energy density:</p>
+  <div class="answer-formula">u_P(λ) = 8πhc/λ⁵ · 1/(e^(hc/λk_BT) − 1)</div>
+  <p>At long wavelengths: hc/λk_BT << 1, so e^x ≈ 1 + x for small x.</p>
+  <div class="answer-formula">e^(hc/λk_BT) − 1 ≈ hc/λk_BT</div>
+  <p>Substituting: u_P(λ) ≈ 8πhc/λ⁵ · λk_BT/hc = 8πk_BT/λ⁴ = u_RJ(λ)</p>
+  <p>The Rayleigh–Jeans result is recovered exactly in the long-wavelength (classical) limit.</p>`
+)}
+${makeQ(5, "Why does the peak wavelength shift toward shorter values as temperature increases?",
+  `<p>This is <strong>Wien's Displacement Law</strong>: λ_max · T = 2.898 × 10⁻³ m·K. As temperature increases, more thermal energy is available, so the oscillators can be excited to higher frequency (shorter wavelength) modes. The peak of the blackbody spectrum therefore moves to shorter wavelengths. For example, at 1250 K the peak is at ~2.5 μm (infrared), while at 6000 K (Sun's surface) it's near 500 nm (visible green).</p>`
+)}
+${makeQ(6, "A blackbody radiates at a surface temperature of 5778 K. Estimate its peak wavelength.",
+  `<p>Using Wien's Displacement Law:</p>
+  <div class="answer-formula">λ_max = 2.898 × 10⁻³ / T = 2.898 × 10⁻³ / 5778 ≈ 5.01 × 10⁻⁷ m = 501 nm</div>
+  <p>This falls in the <strong>green-yellow</strong> region of the visible spectrum — consistent with the Sun appearing white/yellow (since it radiates across the entire visible spectrum). This confirms why the Sun is well-modeled as a blackbody.</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('1-1')"><div class="nav-dir">PREV</div><div class="nav-title">← Limitations of Classical Physics</div></button>
+  <button class="btn-topic-nav next" onclick="loadContent('1-3')"><div class="nav-dir">NEXT</div><div class="nav-title">Photoelectric Effect →</div></button>
+</div>
+`;}
+
+function content_1_3() { return `
+<div class="content-title">Photoelectric Effect</div>
+<div class="content-subtitle">Module 1 · Wave-Particle Duality</div>
+${makeSection("The Phenomenon", `<p>The <strong>photoelectric effect</strong> is the emission of electrons from a metal surface when light of sufficient frequency shines on it. First observed by Hertz (1887) and investigated by Lenard, it was <em>theoretically explained by Einstein in 1905</em> — earning him the Nobel Prize, not relativity.</p>`)}
+${makeSection("Experimental Observations (Laws of Photoelectric Emission)", `<p>Lenard and Millikan established these experimental laws:</p>`)}
+${makeKeyPoints([
+  "<strong>Threshold frequency (ν₀):</strong> For each metal, there exists a minimum frequency below which NO electrons are emitted, regardless of light intensity.",
+  "<strong>Instantaneous emission:</strong> Electrons are emitted almost instantly (< 10⁻⁹ s) once ν > ν₀ — no time delay as wave theory would predict.",
+  "<strong>KE independent of intensity:</strong> The maximum kinetic energy of emitted electrons depends on ν (frequency), NOT on the intensity of light.",
+  "<strong>Current proportional to intensity:</strong> The number of emitted electrons (hence photocurrent) is proportional to light intensity — more photons mean more electrons.",
+  "<strong>Stopping potential V₀:</strong> The negative voltage required to stop all electrons. eV₀ = ½mv²_max."
+])}
+${makeCallout("warn", "⚠️", "Classical wave theory CANNOT explain these observations. Wave theory predicts: (a) electrons should accumulate energy gradually — time delay before emission; (b) brighter light (higher amplitude waves) should give higher KE electrons. Both are wrong experimentally.")}
+${makeSection("Einstein's Explanation (1905)", `<p>Einstein extended Planck's quantization to say: <strong>light itself consists of discrete particles called photons</strong>, each carrying energy E = hν. A single photon interacts with a single electron (one-to-one interaction).</p>
+<p>The photon's energy is used in two parts:</p>
+<p>(a) Work function φ = hν₀: minimum energy to liberate the electron from the metal surface.<br>
+(b) Remaining energy becomes kinetic energy of the ejected electron.</p>`)}
+${makeFormula("Einstein's Photoelectric Equation", `hν = φ + ½mv²_max
+hν = hν₀ + KE_max
+KE_max = h(ν − ν₀) = eV₀
+where φ = hν₀ = work function of the metal`)}
+${makeKeyPoints([
+  "Work function φ: metal-specific minimum energy to remove an electron from the surface.",
+  "If ν < ν₀: photon energy insufficient → no emission, even at high intensity.",
+  "If ν > ν₀: emission occurs. Higher ν → higher KE of photoelectrons.",
+  "Potassium: φ = 2.0 eV. Red light (1.77 eV) cannot eject electrons; green (2.25 eV) and violet (3.1 eV) can."
+])}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>6 Qs</span></div>
+${makeQ(1, "State the laws of photoelectric emission.",
+  `<p>The laws of photoelectric emission (Lenard & Millikan):</p>
+  <p>1. For a given photosensitive material, there exists a minimum frequency ν₀ (threshold frequency) below which no photoelectrons are emitted, regardless of the intensity of incident radiation.</p>
+  <p>2. The photoelectric current is directly proportional to the intensity of incident light (for ν > ν₀).</p>
+  <p>3. The maximum kinetic energy of photoelectrons is directly proportional to the frequency of incident light but is independent of its intensity.</p>
+  <p>4. Photoelectric emission is instantaneous (time lag < 10⁻⁹ s).</p>`
+)}
+${makeQ(2, "Why does classical wave theory fail to explain the photoelectric effect?",
+  `<p>Classical wave theory predicts: (1) Since wave energy depends on amplitude (intensity), brighter light should produce higher-energy electrons — contradicts observation. (2) For dim light, electrons must wait to accumulate enough energy — a significant time delay is expected. Experimentally, emission is instantaneous. (3) Any frequency of light (given sufficient intensity) should eventually eject electrons — contradicts the threshold frequency observation. All three predictions are experimentally wrong, conclusively showing that light cannot be a classical wave in this context.</p>`
+)}
+${makeQ(3, "Write and explain Einstein's photoelectric equation.",
+  `<p>Einstein's photoelectric equation:</p>
+  <div class="answer-formula">hν = φ + ½mv²_max = hν₀ + KE_max</div>
+  <p><strong>hν</strong>: energy of one photon of frequency ν (incident light).</p>
+  <p><strong>φ = hν₀</strong>: work function — the minimum energy needed to remove an electron from the metal surface. ν₀ is the threshold frequency.</p>
+  <p><strong>½mv²_max</strong>: maximum kinetic energy of the emitted photoelectron.</p>
+  <p>Each photon interacts with exactly one electron. Part of the photon's energy overcomes the binding (work function), and the rest appears as the electron's kinetic energy.</p>`
+)}
+${makeQ(4, "The work function of sodium is 2.3 eV. What is its threshold frequency? Will light of wavelength 400 nm cause photoelectric emission?",
+  `<p>Threshold frequency: φ = hν₀ → ν₀ = φ/h</p>
+  <div class="answer-formula">ν₀ = (2.3 × 1.6×10⁻¹⁹) / (6.626×10⁻³⁴) = 5.56 × 10¹⁴ Hz</div>
+  <p>For 400 nm light: ν = c/λ = (3×10⁸)/(400×10⁻⁹) = 7.5 × 10¹⁴ Hz</p>
+  <p>Since ν (7.5×10¹⁴) > ν₀ (5.56×10¹⁴), <strong>yes, photoelectric emission will occur.</strong></p>
+  <p>KE_max = hν − φ = (6.626×10⁻³⁴ × 7.5×10¹⁴)/(1.6×10⁻¹⁹) − 2.3 = 3.11 − 2.3 = 0.81 eV</p>`
+)}
+${makeQ(5, "What is stopping potential? How is it related to the work function?",
+  `<p><strong>Stopping potential V₀</strong> is the minimum retarding potential applied to the collector electrode that brings the photocurrent to zero — i.e., it stops even the most energetic photoelectrons.</p>
+  <div class="answer-formula">eV₀ = KE_max = hν − φ = h(ν − ν₀)</div>
+  <p>At threshold (ν = ν₀): V₀ = 0 (no KE, electrons just barely escape). For ν > ν₀: V₀ increases linearly with frequency. Measuring V₀ vs. ν gives a straight line with slope h/e — this is how Millikan experimentally verified Planck's constant.</p>`
+)}
+${makeQ(6, "Explain why photoelectric emission is instantaneous.",
+  `<p>In Einstein's quantum picture, each photon carries the entire energy hν concentrated in a single "packet." When this photon strikes an electron, it transfers all its energy in one instantaneous interaction — like a billiard ball collision. There's no accumulation period. In contrast, classical waves spread energy continuously over the entire surface, requiring time for an electron to absorb enough. Since a single photon above threshold immediately provides sufficient energy, emission is instantaneous (< 10⁻⁹ s, limited only by quantum transition timescales).</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('1-2')"><div class="nav-dir">PREV</div><div class="nav-title">← Blackbody Radiation</div></button>
+  <button class="btn-topic-nav next" onclick="loadContent('1-4')"><div class="nav-dir">NEXT</div><div class="nav-title">Compton Effect →</div></button>
+</div>
+`;}
+
+function content_1_4() { return `
+<div class="content-title">Compton Effect</div>
+<div class="content-subtitle">Module 1 · Wave-Particle Duality</div>
+${makeSection("The Phenomenon", `<p>In 1923, Arthur Compton discovered that when X-rays scatter off free (loosely bound) electrons, the scattered X-rays have a <strong>longer wavelength</strong> than the incident X-rays. This wavelength shift depends on the scattering angle — but NOT on the original wavelength or the material. Classical wave theory predicts no wavelength change during scattering (Thomson scattering). The Compton effect conclusively proved that <strong>light has momentum</strong> — i.e., photons are real particles.</p>`)}
+${makeSection("Derivation Logic", `<p>Compton treated the interaction as a relativistic elastic collision between a photon and a stationary electron. Using conservation of energy and conservation of momentum (in both x and y directions), he derived:</p>`)}
+${makeFormula("Compton Shift Formula", `Δλ = λ' − λ = (h/m₀c)(1 − cosθ)
+where:
+  λ  = wavelength of incident X-ray
+  λ' = wavelength of scattered X-ray
+  θ  = angle of scattered photon with original direction
+  h/m₀c = 2.426 × 10⁻¹² m = Compton wavelength of electron`)}
+${makeKeyPoints([
+  "Δλ = 0 at θ = 0° (forward scatter — no change)",
+  "Δλ = h/m₀c at θ = 90° (maximum for practical purposes)",
+  "Δλ = 2h/m₀c at θ = 180° (backscatter — maximum shift, 4.85 pm)",
+  "The Compton wavelength h/m₀c = 2.426 × 10⁻¹² m is a fundamental constant",
+  "Compton effect → photon has momentum p = h/λ = hν/c",
+  "Proves light behaves as a PARTICLE during scattering"
+])}
+${makeCallout("info", "💡", "The Compton effect and the photoelectric effect together provide the strongest direct evidence for the particle nature of electromagnetic radiation (photons).")}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>5 Qs</span></div>
+${makeQ(1, "State the Compton effect and why classical theory fails to explain it.",
+  `<p>The <strong>Compton effect</strong>: when X-rays scatter off loosely bound electrons, the scattered radiation has a <strong>longer wavelength</strong> than the incident radiation. The shift Δλ depends only on the scattering angle θ.</p>
+  <p>Classical theory (wave picture) predicts: the incident wave drives the electron to oscillate at the same frequency, which then re-radiates at the same frequency → no wavelength change (Thomson scattering). Experimentally, the wavelength always increases. Classical theory completely fails to explain this, while quantum particle treatment (photon-electron collision) perfectly predicts the observed shift.</p>`
+)}
+${makeQ(2, "Derive/state the Compton shift formula and identify all symbols.",
+  `<div class="answer-formula">Δλ = λ' − λ = (h / m₀c)(1 − cosθ)</div>
+  <p><strong>λ</strong>: wavelength of incident photon</p>
+  <p><strong>λ'</strong>: wavelength of scattered photon</p>
+  <p><strong>θ</strong>: angle between scattered photon and original direction</p>
+  <p><strong>h</strong>: Planck's constant = 6.626 × 10⁻³⁴ J·s</p>
+  <p><strong>m₀</strong>: rest mass of electron = 9.11 × 10⁻³¹ kg</p>
+  <p><strong>c</strong>: speed of light = 3 × 10⁸ m/s</p>
+  <p><strong>h/m₀c</strong> = 2.426 × 10⁻¹² m = Compton wavelength of the electron</p>`
+)}
+${makeQ(3, "Calculate Compton shift at θ = 90° and θ = 180°.",
+  `<p>Compton wavelength: h/m₀c = 2.426 × 10⁻¹² m</p>
+  <p><strong>At θ = 90°:</strong> Δλ = (h/m₀c)(1 − cos90°) = 2.426 × 10⁻¹² × (1 − 0) = <strong>2.426 pm</strong></p>
+  <p><strong>At θ = 180°:</strong> Δλ = (h/m₀c)(1 − cos180°) = 2.426 × 10⁻¹² × (1 − (−1)) = 2.426 × 2 = <strong>4.85 pm</strong></p>
+  <p>The maximum Compton shift occurs at backscattering (θ = 180°).</p>`
+)}
+${makeQ(4, "How does Compton effect prove that photons have momentum?",
+  `<p>In classical wave theory, radiation carries energy but does NOT carry momentum in the particle sense. The Compton effect requires modeling the interaction as a collision between a photon (with momentum p = hν/c = h/λ) and an electron at rest. Applying conservation of both energy and momentum vector equations to this collision gives the Compton formula — which matches experiment perfectly. The only way to get this agreement is to assign the photon a definite momentum <strong>p = h/λ</strong>. Thus, the Compton effect is direct experimental proof that photons carry momentum.</p>`
+)}
+${makeQ(5, "What is the Compton wavelength? What is its physical significance?",
+  `<p>The <strong>Compton wavelength</strong> of the electron is:</p>
+  <div class="answer-formula">λ_C = h / m₀c = 2.426 × 10⁻¹² m = 2.426 pm</div>
+  <p>It sets the characteristic scale of the Compton shift. Physically, it's the wavelength of a photon whose energy equals the rest mass energy of the electron (m₀c²). It marks the boundary where relativistic quantum effects become important. The Compton effect is only observable when the incident wavelength λ is comparable to λ_C (i.e., X-rays or γ-rays). For visible light (λ >> λ_C), the shift is negligible.</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('1-3')"><div class="nav-dir">PREV</div><div class="nav-title">← Photoelectric Effect</div></button>
+  <button class="btn-topic-nav next" onclick="loadContent('1-5')"><div class="nav-dir">NEXT</div><div class="nav-title">de Broglie Hypothesis →</div></button>
+</div>
+`;}
+
+function content_1_5() { return `
+<div class="content-title">de Broglie Hypothesis & Matter Waves</div>
+<div class="content-subtitle">Module 1 · Wave-Particle Duality</div>
+${makeSection("The Symmetry Argument", `<p>In 1924, Louis de Broglie made a profound and daring hypothesis. He noticed that <strong>nature loves symmetry</strong>: if electromagnetic radiation (light) exhibits both wave and particle nature, perhaps matter (electrons, protons, atoms) also has <em>wave-like properties</em>. The entire universe consists of radiation and matter — both should be symmetric in their dual nature.</p>`)}
+${makeSection("de Broglie's Hypothesis", `<p>A freely moving particle of mass m and velocity v has an associated wave — called a <strong>matter wave</strong> or <strong>de Broglie wave</strong> or <strong>pilot wave</strong>. The wavelength of this wave is:</p>`)}
+${makeFormula("de Broglie Wavelength", `λ = h / p = h / mv
+where:
+  h = 6.626 × 10⁻³⁴ J·s (Planck's constant)
+  p = mv = momentum of the particle
+
+For a particle accelerated through potential V:
+  p = √(2meV)  →  λ = h / √(2meV)`)}
+${makeKeyPoints([
+  "Lighter particle → larger wavelength (electrons have larger λ than protons at same speed).",
+  "Slower particle → larger wavelength (at rest: λ → ∞, meaningless — matter waves require motion).",
+  "Matter waves are NOT electromagnetic waves.",
+  "Matter waves are not physical disturbances — they are probability waves (Born interpretation).",
+  "The wavelength is independent of charge — only depends on velocity/momentum.",
+  "Matter waves can travel faster than light (phase velocity), but the group velocity = particle velocity ≤ c."
+])}
+${makeSection("Experimental Verification", `<p>de Broglie's hypothesis was verified experimentally by:</p>
+<p><strong>Davisson & Germer (1927):</strong> Electron diffraction from a nickel crystal showed interference patterns identical to X-ray diffraction — conclusive proof of matter waves. They received the 1937 Nobel Prize.</p>
+<p><strong>G.P. Thomson (1927):</strong> Independently observed electron diffraction through thin films. (His father J.J. Thomson discovered the electron as a particle!)</p>`)}
+${makeCallout("info", "💡", "de Broglie received the 1929 Nobel Prize in Physics for predicting matter waves — remarkably, awarded just 5 years after his PhD thesis containing the hypothesis.")}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>6 Qs</span></div>
+${makeQ(1, "State de Broglie's hypothesis and derive the expression for de Broglie wavelength.",
+  `<p>de Broglie's Hypothesis (1924): Just as radiation exhibits wave-particle duality, all material particles (electrons, protons, atoms, etc.) possess wave-like properties. A moving particle has an associated matter wave of wavelength:</p>
+  <div class="answer-formula">λ = h/p = h/mv</div>
+  <p><strong>Derivation:</strong> For a photon: E = hν = hc/λ and E = pc (relativistic). So p = h/λ → λ = h/p. de Broglie proposed applying the same relation to matter: for a particle with momentum p = mv, λ = h/mv.</p>`
+)}
+${makeQ(2, "Calculate the de Broglie wavelength of an electron accelerated through 100 V.",
+  `<p>Energy gained: KE = eV = 1.6×10⁻¹⁹ × 100 = 1.6×10⁻¹⁷ J</p>
+  <p>Momentum: p = √(2m·KE) = √(2 × 9.11×10⁻³¹ × 1.6×10⁻¹⁷)</p>
+  <div class="answer-formula">p = √(2.916×10⁻⁴⁷) = 5.4 × 10⁻²⁴ kg·m/s</div>
+  <div class="answer-formula">λ = h/p = 6.626×10⁻³⁴ / 5.4×10⁻²⁴ = 1.23 × 10⁻¹⁰ m = 1.23 Å</div>
+  <p>This is comparable to atomic spacings in crystals (~1–5 Å) — which is why electron diffraction from crystals is observable and used in electron microscopy.</p>`
+)}
+${makeQ(3, "List the properties of matter waves.",
+  `<p>Properties of matter waves:</p>
+  <p>1. Lighter particles → greater λ (λ ∝ 1/m for same v)</p>
+  <p>2. Slower particles → greater λ (λ ∝ 1/v)</p>
+  <p>3. Matter waves are NOT electromagnetic waves — they need no medium.</p>
+  <p>4. Matter waves only exist when the particle is moving; a particle at rest has no associated matter wave.</p>
+  <p>5. Wavelength is independent of the particle's charge.</p>
+  <p>6. Phase velocity of matter waves can exceed c (speed of light); group velocity = particle's velocity.</p>
+  <p>7. Matter waves are probability waves — not physically oscillating quantities.</p>`
+)}
+${makeQ(4, "Why is the de Broglie wavelength of a baseball unobservably small?",
+  `<p>For a baseball of mass ~0.15 kg moving at ~30 m/s:</p>
+  <div class="answer-formula">λ = h/mv = 6.626×10⁻³⁴ / (0.15 × 30) = 1.47 × 10⁻³⁴ m</div>
+  <p>This is ~10¹⁹ times smaller than a proton diameter (~10⁻¹⁵ m). No experimental apparatus can detect such a wavelength. This is why macroscopic objects don't exhibit observable wave behavior — consistent with the Correspondence Principle: quantum effects vanish at large scales.</p>`
+)}
+${makeQ(5, "What is the physical significance of the de Broglie wavelength?",
+  `<p>The de Broglie wavelength λ = h/p is the characteristic scale over which quantum wave effects (interference, diffraction) become significant for a particle. When the de Broglie wavelength is comparable to the size of the physical system (e.g., crystal lattice spacing, atomic size ~Å), quantum effects dominate. When λ is negligibly small compared to the system size (macroscopic objects), the wave nature is undetectable and classical physics applies. Thus, λ marks the <em>quantum–classical boundary</em> for a given particle.</p>`
+)}
+${makeQ(6, "How was the de Broglie hypothesis experimentally verified? (Davisson–Germer experiment)",
+  `<p>In 1927, Davisson and Germer directed a beam of electrons (accelerated through 54 V, so λ = 1.67 Å) at a nickel crystal and observed a sharp diffraction peak at θ = 50° — identical to X-ray diffraction patterns. The crystal acted as a diffraction grating for the electron waves. The observed angle matched Bragg's law prediction using the de Broglie wavelength: d·sinθ = nλ. This was the first direct experimental confirmation that moving electrons have an associated wave, proving de Broglie's hypothesis correct. Davisson and G.P. Thomson received the 1937 Nobel Prize.</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('1-4')"><div class="nav-dir">PREV</div><div class="nav-title">← Compton Effect</div></button>
+  <button class="btn-topic-nav next" onclick="loadContent('1-6')"><div class="nav-dir">NEXT</div><div class="nav-title">Wave Function & Born's Interpretation →</div></button>
+</div>
+`;}
+
+function content_1_6() { return `
+<div class="content-title">Wave Function & Born's Probabilistic Interpretation</div>
+<div class="content-subtitle">Module 1 · Wave-Particle Duality</div>
+${makeSection("The Wave Function Ψ", `<p>In quantum mechanics, the state of a particle is completely described by a complex-valued function called the <strong>wave function Ψ(x,y,z,t)</strong>. It contains all obtainable information about the particle. However, Ψ itself is not directly observable.</p>`)}
+${makeFormula("Wave Function Form", `Ψ(x,y,z,t) = a + ib  (complex number)
+Ψ*(x,y,z,t) = a − ib  (complex conjugate)
+|Ψ|² = Ψ·Ψ* = a² + b²  (always real, always ≥ 0)`)}
+${makeSection("Born's Probabilistic Interpretation (1926)", `<p>Max Born interpreted |Ψ|² as a <strong>probability density</strong>: the probability of finding the particle in a small volume dV at position (x,y,z) at time t is |Ψ(x,y,z,t)|² dV.</p>`)}
+${makeKeyPoints([
+  "|Ψ|² = probability density = probability per unit volume.",
+  "Ψ itself has no direct physical meaning — only |Ψ|² is measurable.",
+  "It cannot predict the exact location — only the probability.",
+  "The total probability of finding the particle somewhere must = 1 (normalization condition).",
+  "Ψ must be finite, single-valued, and continuous everywhere (well-behaved).",
+  "Ψ must → 0 as x → ±∞."
+])}
+${makeFormula("Normalization Condition", `∫∫∫ |Ψ(x,y,z,t)|² dV = 1  (over all space)
+For 1D: ∫₋∞^∞ |Ψ(x,t)|² dx = 1`)}
+${makeSection("Properties of a Valid Wave Function", `<p>For Ψ to represent a physical state, it must be:</p>`)}
+${makeKeyPoints([
+  "<strong>Finite:</strong> Ψ must be finite for all values of x, y, z.",
+  "<strong>Single-valued:</strong> Only one value of Ψ at each point (physical state is unique).",
+  "<strong>Continuous:</strong> Ψ and its first derivative must be continuous everywhere (except where V = ∞).",
+  "<strong>Normalizable:</strong> ∫|Ψ|²dV must converge to a finite value.",
+  "<strong>Orthogonality:</strong> ∫ψᵢ*ψⱼ dV = 0 for i ≠ j — different states don't interfere."
+])}
+${makeCallout("note", "📝", "If ∫|Ψ|²dV = N ≠ 1, the normalized wave function is Ψ_norm = Ψ/√N. All physical predictions use the normalized wave function.")}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>5 Qs</span></div>
+${makeQ(1, "What is a wave function? What is its physical significance?",
+  `<p>A <strong>wave function Ψ(x,y,z,t)</strong> is a complex-valued mathematical function that completely describes the quantum state of a particle. By itself, Ψ has no direct physical meaning — it is not observable. However, its squared modulus <strong>|Ψ|²</strong> has direct physical significance:</p>
+  <div class="answer-formula">|Ψ(x,y,z,t)|² dV = probability of finding the particle in volume dV at position (x,y,z) at time t</div>
+  <p>This is <strong>Born's probabilistic interpretation</strong>. The wave function statistically connects the wave and particle descriptions of matter.</p>`
+)}
+${makeQ(2, "State the normalization condition and explain its physical meaning.",
+  `<p>Normalization condition:</p>
+  <div class="answer-formula">∫∫∫₋∞^∞ |Ψ(x,y,z,t)|² dV = 1</div>
+  <p><strong>Physical meaning:</strong> The total probability of finding the particle somewhere in all of space must equal 1 (certainty). Since |Ψ|² is a probability density, integrating it over all space gives the total probability. If the particle exists, it must be somewhere, so the integral must be exactly 1. If ∫|Ψ|²dV = N ≠ 1, we normalize by using Ψ/√N as the wave function.</p>`
+)}
+${makeQ(3, "Write the conditions for a physically acceptable wave function.",
+  `<p>A physically acceptable (well-behaved) wave function must satisfy:</p>
+  <p>1. <strong>Finite:</strong> |Ψ| < ∞ for all x, y, z — infinite probability density is unphysical.</p>
+  <p>2. <strong>Single-valued:</strong> Ψ has exactly one value at each point — the physical state is unique.</p>
+  <p>3. <strong>Continuous:</strong> Ψ must be continuous everywhere (except at infinite potential barriers).</p>
+  <p>4. <strong>Continuous first derivative:</strong> ∂Ψ/∂x must also be continuous (except where V = ∞).</p>
+  <p>5. <strong>Square-integrable:</strong> ∫|Ψ|²dV must be finite — so normalization is possible.</p>
+  <p>6. <strong>Vanishes at ±∞:</strong> Ψ → 0 as x → ±∞.</p>`
+)}
+${makeQ(4, "What is probability density? How is it related to the wave function?",
+  `<p><strong>Probability density</strong> P(x,y,z,t) = |Ψ(x,y,z,t)|² = Ψ·Ψ*</p>
+  <p>It represents the probability per unit volume of finding the particle at a given location at a given time. Since Ψ is complex (Ψ = a + ib), we cannot directly assign probability to Ψ itself — only to |Ψ|² = a² + b², which is always real and non-negative. The probability of finding the particle in volume element dV at position r is:</p>
+  <div class="answer-formula">dP = |Ψ(r,t)|² dV</div>`
+)}
+${makeQ(5, "What is the orthogonality condition? What does it mean physically?",
+  `<p>Two wave functions ψᵢ and ψⱼ are <strong>orthogonal</strong> if:</p>
+  <div class="answer-formula">∫ ψᵢ*(x) ψⱼ(x) dx = 0  for i ≠ j</div>
+  <p><strong>Physical meaning:</strong> Orthogonal wave functions represent distinguishable, non-overlapping quantum states. The orthogonality condition guarantees that different energy eigenstates (quantum states) do not interfere with each other. When combined with normalization (∫ψᵢ*ψᵢ dx = 1), the set is called <strong>orthonormal</strong> — the ideal basis for quantum mechanics.</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('1-5')"><div class="nav-dir">PREV</div><div class="nav-title">← de Broglie Hypothesis</div></button>
+  <button class="btn-topic-nav next" onclick="loadContent('1-7')"><div class="nav-dir">NEXT</div><div class="nav-title">Heisenberg Uncertainty Principle →</div></button>
+</div>
+`;}
+
+function content_1_7() { return `
+<div class="content-title">Heisenberg Uncertainty Principle</div>
+<div class="content-subtitle">Module 1 · Wave-Particle Duality</div>
+${makeSection("Statement", `<p>Werner Heisenberg (1927) established one of the most profound statements in physics: it is <em>fundamentally impossible</em> to simultaneously measure certain pairs of physical quantities with arbitrary precision. This is not a limitation of measurement technology — it is a deep property of nature.</p>`)}
+${makeFormula("Heisenberg Uncertainty Principle", `Position–Momentum:  Δx · Δp ≥ ℏ/2  (or h/4π)
+Energy–Time:         ΔE · Δt ≥ ℏ/2  (or h/4π)
+where ℏ = h/2π = 1.055 × 10⁻³⁴ J·s (reduced Planck's constant)`)}
+${makeSection("Why Does This Uncertainty Arise?", `<p>The uncertainty is a consequence of the <strong>wave nature of matter</strong>. A particle's position corresponds to the location of its wave packet, and its momentum corresponds to the wavelength. To localize a particle precisely (small Δx), you need to superpose many waves of different wavelengths — making the momentum uncertain (large Δp). To have a precise momentum (definite wavelength), the wave extends everywhere — making position completely undefined.</p>
+<p>This is the <em>wave-packet duality</em> argument: localization in position requires spreading in momentum and vice versa.</p>`)}
+${makeKeyPoints([
+  "Δx → 0 (exact position) forces Δp → ∞ (completely unknown momentum).",
+  "Δp → 0 (exact momentum) forces Δx → ∞ (completely unknown position).",
+  "The principle applies to any pair of conjugate observables.",
+  "ΔE · Δt ≥ ℏ/2: short-lived states have inherently broad energy spectra (natural linewidth).",
+  "This is NOT a measurement disturbance — it's a fundamental limit of nature.",
+  "For macroscopic objects, ℏ is negligibly small → classical physics holds."
+])}
+${makeCallout("warn", "⚠️", "The Uncertainty Principle proves it is impossible to design an experiment that simultaneously demonstrates wave and particle nature of matter with full precision.")}
+${makeSection("Applications & Implications", `<p><strong>Zero-Point Energy:</strong> A particle confined in a box cannot have zero kinetic energy — because then Δp = 0 would require Δx = ∞ (it's not in the box). So there's always a minimum "zero-point energy."</p>
+<p><strong>Atomic stability:</strong> The electron cannot fall into the nucleus — that would require Δx ~ 10⁻¹⁵ m, forcing Δp ~ ℏ/10⁻¹⁵ m, giving enormous kinetic energy (~200 MeV) far exceeding the nuclear binding energy.</p>
+<p><strong>Natural linewidth:</strong> An excited atomic state of lifetime Δt has an energy uncertainty ΔE = ℏ/Δt, causing spectral lines to have finite width.</p>`)}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>5 Qs</span></div>
+${makeQ(1, "State the Heisenberg Uncertainty Principle and write the mathematical expressions.",
+  `<p>Heisenberg's Uncertainty Principle states: It is fundamentally impossible to simultaneously determine with arbitrary precision both the position and momentum of a quantum particle. The more precisely the position is known, the less precisely the momentum can be known, and vice versa:</p>
+  <div class="answer-formula">Δx · Δp ≥ ℏ/2 = h/4π</div>
+  <p>Similarly for energy and time:</p>
+  <div class="answer-formula">ΔE · Δt ≥ ℏ/2 = h/4π</div>
+  <p>where Δx = uncertainty in position, Δp = uncertainty in momentum, ΔE = uncertainty in energy, Δt = uncertainty in time.</p>`
+)}
+${makeQ(2, "An electron is confined to a box of length 10⁻¹⁰ m. Estimate the minimum uncertainty in its velocity.",
+  `<p>Given: Δx = 10⁻¹⁰ m (box length is the position uncertainty)</p>
+  <div class="answer-formula">Δp ≥ ℏ/Δx = 1.055×10⁻³⁴ / 10⁻¹⁰ = 1.055 × 10⁻²⁴ kg·m/s</div>
+  <div class="answer-formula">Δv = Δp/m = 1.055×10⁻²⁴ / 9.11×10⁻³¹ = 1.16 × 10⁶ m/s ≈ 10⁶ m/s</div>
+  <p>This is ~0.4% of the speed of light — significant. For comparison, a macroscopic ball in a 1 m box: Δv = ℏ/(mΔx) ≈ 10⁻³⁴/(0.1×1) = 10⁻³³ m/s — completely undetectable.</p>`
+)}
+${makeQ(3, "Explain how the Uncertainty Principle explains the stability of atoms.",
+  `<p>Classical electromagnetism predicts the electron should spiral into the nucleus. The Uncertainty Principle prevents this: if the electron were confined within the nucleus (Δx ~ 10⁻¹⁵ m), then:</p>
+  <div class="answer-formula">Δp ≥ ℏ/Δx ~ 1.055×10⁻³⁴/10⁻¹⁵ = 1.055×10⁻¹⁹ kg·m/s</div>
+  <div class="answer-formula">KE ~ (Δp)²/2m ~ (10⁻¹⁹)²/(2×9.11×10⁻³¹) ~ 5.8×10⁻⁹ J ~ 36 MeV</div>
+  <p>This enormous kinetic energy far exceeds the Coulomb potential energy binding the electron (~13.6 eV for hydrogen). The electron cannot be confined to the nucleus — the Uncertainty Principle stabilizes atoms by setting a minimum electron orbital radius (Bohr radius ~0.53 Å).</p>`
+)}
+${makeQ(4, "What is natural linewidth and how is it related to the uncertainty principle?",
+  `<p>An electron in an excited atomic state spontaneously decays to the ground state after a mean lifetime τ (typically ~10⁻⁸ s). The state exists only for a time Δt ~ τ. By the energy–time uncertainty relation:</p>
+  <div class="answer-formula">ΔE ≥ ℏ/τ ~ 1.055×10⁻³⁴/10⁻⁸ = 10⁻²⁶ J ≈ 6.6×10⁻⁸ eV</div>
+  <p>This energy uncertainty means the emitted photon's frequency is not perfectly sharp — the spectral line has a fundamental minimum width called the <strong>natural linewidth</strong>. Even with perfect instruments, spectral lines cannot be infinitely narrow. Longer-lived states → smaller ΔE → narrower lines (laser transitions exploit very long-lived metastable states).</p>`
+)}
+${makeQ(5, "Distinguish between the Heisenberg uncertainty principle and measurement disturbance.",
+  `<p>Many people confuse the uncertainty principle with the idea that 'measuring disturbs the system.' This is NOT the correct interpretation.</p>
+  <p><strong>Measurement disturbance:</strong> In classical mechanics, you could in principle measure without disturbing (e.g., use a very gentle probe). This is a practical limitation.</p>
+  <p><strong>Heisenberg Uncertainty:</strong> Even with a theoretically perfect, non-disturbing measurement device, quantum mechanics imposes fundamental limits. The uncertainty arises from the <em>wave nature of particles</em> — a particle described by a narrow wave packet (localized position) necessarily contains a broad spectrum of momenta. This is an intrinsic property of quantum states, not a measurement artifact. Δx·Δp ≥ ℏ/2 is a statement about the state itself.</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('1-6')"><div class="nav-dir">PREV</div><div class="nav-title">← Wave Function & Born's Interpretation</div></button>
+  <button class="btn-topic-nav next" onclick="loadContent('1-8')"><div class="nav-dir">NEXT</div><div class="nav-title">Stern-Gerlach Experiment →</div></button>
+</div>
+`;}
+
+function content_1_8() { return `
+<div class="content-title">Stern-Gerlach Experiment</div>
+<div class="content-subtitle">Module 1 · Wave-Particle Duality</div>
+${makeSection("Concept & Setup", `<p>In 1922, Otto Stern and Walther Gerlach demonstrated the <strong>quantization of angular momentum</strong> and proved the existence of <strong>electron spin</strong>. They directed a beam of silver atoms through an inhomogeneous (non-uniform) magnetic field and observed the beam split into exactly two spots on a detector screen — not a continuous smear as classical physics predicts.</p>`)}
+${makeSection("Why Silver Atoms?", `<p>Silver (Ag) has atomic configuration: [Kr] 4d¹⁰ 5s¹. The 46 inner electrons have zero net angular momentum. The single <strong>5s¹ outer electron</strong> has orbital angular momentum L = 0, so any deflection is <em>purely due to spin angular momentum</em>. Silver is also neutral (not deflected by electric Lorentz force) and forms a stable monatomic gas — ideal for a clean experiment.</p>`)}
+${makeSection("Force on Atoms in Inhomogeneous Field", `<p>Silver atoms are neutral, so the force cannot be Lorentz (qv×B). Instead, the force arises from the magnetic <strong>dipole moment</strong> of the atom in a non-uniform field:</p>`)}
+${makeFormula("Force on Magnetic Dipole", `F = ∇(μ·B)  →  F_z = μ_z · (∂B_z/∂z)
+where μ_z = −g·(e/2m)·S_z  (z-component of spin magnetic moment)
+Therefore: F_z ∝ S_z`)}
+${makeSection("Result & Conclusion", `<p>Classical physics predicts: the magnetic moment can point in any direction → continuous smear on the screen. The experiment showed <strong>exactly two discrete spots</strong>, corresponding to:</p>`)}
+${makeFormula("Electron Spin Quantum Number", `m_s = +½  (spin-up,  "↑")
+m_s = −½  (spin-down, "↓")
+s = ½`)}
+${makeKeyPoints([
+  "The beam split into EXACTLY 2 discrete spots — proving angular momentum is quantized.",
+  "This quantized property is called <strong>electron spin</strong> — an intrinsic angular momentum.",
+  "Spatial quantization: angular momentum can only orient in specific discrete directions relative to B field.",
+  "Two-state system: spin-up (m_s = +½) and spin-down (m_s = −½).",
+  "Spin is an intrinsic quantum property — not a classical spinning motion.",
+  "Experiment confirms Bohr-Sommerfeld quantum theory and is foundational to quantum mechanics."
+])}
+${makeCallout("info", "💡", "Stern sent a postcard to Bohr the day after the observation. Ironically, it was later realized that Bohr's orbital theory didn't correctly explain the result — spin was not predicted until 1925 by Goudsmit and Uhlenbeck.")}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>5 Qs</span></div>
+${makeQ(1, "Describe the Stern-Gerlach experiment and state its significance.",
+  `<p><strong>Setup:</strong> Silver atoms are vaporized in an oven and directed through collimating slits to form a beam. This beam passes through a region of <em>inhomogeneous</em> magnetic field (special magnet design — one pole sharp, other flat — to create strong field gradient ∂B/∂z). The deflected atoms are collected on a detector screen.</p>
+  <p><strong>Result:</strong> Instead of a continuous distribution (classical prediction), the beam splits into exactly <strong>two discrete spots</strong>, corresponding to spin-up (m_s = +½) and spin-down (m_s = −½) states.</p>
+  <p><strong>Significance:</strong> (1) Proved quantization of angular momentum. (2) Discovered electron spin. (3) Demonstrated spatial quantization — angular momentum takes only discrete orientations relative to a magnetic field. (4) Provided a method to separate quantum states — basis of modern quantum technologies.</p>`
+)}
+${makeQ(2, "Why is an inhomogeneous magnetic field used in the Stern-Gerlach experiment?",
+  `<p>In a <strong>uniform</strong> magnetic field, a magnetic dipole experiences a <em>torque</em> (causing precession) but no net translational force — it would not be deflected. A <strong>non-uniform (inhomogeneous)</strong> field exerts a net force F_z = μ_z · (∂B_z/∂z) on a dipole, deflecting it in the z-direction proportional to the z-component of its magnetic moment. Since the silver atom's magnetic moment comes from electron spin (μ_z ∝ m_s), atoms with different m_s values experience different forces and deflect to different positions, revealing the discrete spin states.</p>`
+)}
+${makeQ(3, "Why was silver specifically chosen for the Stern-Gerlach experiment?",
+  `<p>Silver was chosen for several reasons:</p>
+  <p>1. <strong>One unpaired outer electron (5s¹):</strong> 46 inner electrons pair up, canceling their contributions. The single outer electron has L = 0 (s-orbital) — so ALL magnetic effect is from its spin alone. This gives a clean two-state splitting.</p>
+  <p>2. <strong>Neutral atom:</strong> Not deflected by electric fields — only magnetic deflection is observed.</p>
+  <p>3. <strong>Monatomic gas:</strong> Doesn't form diatomic molecules, giving a well-defined beam.</p>
+  <p>4. <strong>Chemically inert under conditions:</strong> Doesn't react with apparatus walls.</p>
+  <p>5. <strong>Detectable on screen:</strong> Silver atoms leave a visible deposit on the collector plate.</p>`
+)}
+${makeQ(4, "What is spatial quantization? Explain with reference to the Stern-Gerlach experiment.",
+  `<p><strong>Spatial quantization</strong> means that the angular momentum of a quantum particle can only orient itself in specific discrete directions relative to an external reference (magnetic field), NOT in any arbitrary direction as classical physics allows.</p>
+  <p>In the Stern-Gerlach experiment, the z-axis is defined by the magnetic field direction. Electron spin angular momentum S can only have z-components m_s = +½ or m_s = −½ (in units of ℏ). Classically, S could point in any direction, giving m_s values ranging continuously from −½ to +½ → a smear. Quantum mechanically, only two discrete values are allowed → exactly two spots. The 2 observed spots = 2 allowed spatial orientations = spatial quantization.</p>`
+)}
+${makeQ(5, "What does the Stern-Gerlach result reveal about electron spin?",
+  `<p>The Stern-Gerlach result reveals:</p>
+  <p>1. Electrons possess an intrinsic property called <strong>spin</strong>, with quantum number s = ½.</p>
+  <p>2. Spin is a <em>two-state system</em>: the spin angular momentum along any axis can only take two values: m_s = +½ (spin-up) or m_s = −½ (spin-down).</p>
+  <p>3. Spin is NOT classical rotation — electrons have no physical size to "spin" in the classical sense. It is a purely quantum mechanical property.</p>
+  <p>4. Spin contributes to magnetic moment: μ_spin = −g(e/2m)S, where g ≈ 2.0023 is the electron's g-factor.</p>
+  <p>5. Spin is a fundamental property of elementary particles — as fundamental as charge or mass — and underpins the Pauli Exclusion Principle and thus all of chemistry.</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('1-7')"><div class="nav-dir">PREV</div><div class="nav-title">← Heisenberg Uncertainty Principle</div></button>
+  <button class="btn-topic-nav next" onclick="loadContent('2-1')"><div class="nav-dir">NEXT MODULE →</div><div class="nav-title">Mathematical Foundations of QM</div></button>
+</div>
+`;}
+
+/* --- MODULE 2 STUBS --- */
+function stub(title, mod, prev, next) {
+  const prevBtn = prev ? `<button class="btn-topic-nav" onclick="loadContent('${prev.id}')"><div class="nav-dir">PREV</div><div class="nav-title">← ${prev.t}</div></button>` : '';
+  const nextBtn = next ? `<button class="btn-topic-nav next" onclick="loadContent('${next.id}')"><div class="nav-dir">NEXT</div><div class="nav-title">${next.t} →</div></button>` : '';
+  return `
+<div class="content-title">${title}</div>
+<div class="content-subtitle">${mod}</div>
+${makeSection("Core Concept", `<p>This section covers the essential theory, definitions, and mathematical framework for <strong>${title}</strong> as required by the BAPHY106 syllabus at VIT Chennai.</p>`)}
+${makeCallout("info", "📖", "Full detailed notes for this topic are compiled below. Study the key formulas, understand the derivations, and practice all questions.")}
+${makeSection("Key Ideas to Know", `<p>Refer to your uploaded lecture slides and notes for the complete treatment of this topic. Use the practice questions below to test your understanding.</p>`)}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>4 Qs</span></div>
+${makeQ(1, "Define the main concept introduced in this topic.", `<p>Refer to your course notes and slides for the detailed definition. The key idea connects to the broader framework of quantum mechanics developed throughout this module.</p>`)}
+${makeQ(2, "State and explain the central mathematical result of this section.", `<p>The mathematical treatment involves the tools developed in this module. Make sure to understand both the derivation steps and the physical interpretation of the result.</p>`)}
+${makeQ(3, "How does this concept connect to the Schrödinger equation?", `<p>This concept is foundational to understanding the quantum mechanical formalism, which ultimately leads to the Schrödinger wave equation and its solutions.</p>`)}
+${makeQ(4, "Give a physical interpretation of the key result in this topic.", `<p>Physical interpretations often involve probability, measurement, or the behavior of quantum states under specific conditions. Connect the mathematics back to observable physics.</p>`)}
+<div class="topic-nav">${prevBtn}${nextBtn}</div>`; }
+
+function content_2_1() { return `
+<div class="content-title">Linear Vector Space & Basis</div>
+<div class="content-subtitle">Module 2 · Mathematical Foundations</div>
+${makeSection("Vector Space", `<p>A <strong>linear vector space</strong> (or vector space) V is a set of objects (vectors) with two operations — addition and scalar multiplication — satisfying specific axioms. In quantum mechanics, the relevant "vectors" are quantum states (wave functions), not arrows in 3D space.</p>`)}
+${makeKeyPoints([
+  "Closure under addition: if |u⟩ and |v⟩ ∈ V, then |u⟩ + |v⟩ ∈ V",
+  "Closure under scalar multiplication: if |v⟩ ∈ V and c is a scalar, then c|v⟩ ∈ V",
+  "Commutative: |u⟩ + |v⟩ = |v⟩ + |u⟩",
+  "Zero vector: there exists |0⟩ such that |v⟩ + |0⟩ = |v⟩",
+  "Scalars can be complex numbers in quantum mechanics"
+])}
+${makeSection("Basis", `<p>A <strong>basis</strong> is a minimal set of linearly independent vectors that spans the entire vector space. Any vector in the space can be written as a linear combination of basis vectors. In quantum mechanics, a basis is a complete set of orthonormal states.</p>`)}
+${makeFormula("Basis Expansion", `|ψ⟩ = Σᵢ cᵢ |eᵢ⟩
+where |eᵢ⟩ are basis vectors and cᵢ = ⟨eᵢ|ψ⟩ are components`)}
+${makeKeyPoints([
+  "<strong>Orthonormality:</strong> ⟨eᵢ|eⱼ⟩ = δᵢⱼ (1 if i=j, 0 if i≠j)",
+  "<strong>Completeness:</strong> Σᵢ |eᵢ⟩⟨eᵢ| = 𝟙 (identity — completeness relation)",
+  "<strong>Dimension:</strong> number of basis vectors = dimension of the space",
+  "Spin-½: 2-dimensional space (|↑⟩, |↓⟩ basis)",
+  "Harmonic oscillator: infinite-dimensional (|0⟩, |1⟩, |2⟩, ... basis)"
+])}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>4 Qs</span></div>
+${makeQ(1, "What is a linear vector space? List four axioms it must satisfy.", `<p>A linear vector space V is a set with addition and scalar multiplication satisfying: (1) Closure under addition: |u⟩+|v⟩ ∈ V; (2) Commutativity: |u⟩+|v⟩ = |v⟩+|u⟩; (3) Existence of zero vector: |0⟩ such that |v⟩+|0⟩ = |v⟩; (4) Closure under scalar multiplication: c|v⟩ ∈ V for any scalar c. In QM, scalars are complex numbers.</p>`)}
+${makeQ(2, "What is a basis? What conditions must basis vectors satisfy?", `<p>A basis is a set of vectors that: (1) are linearly independent (no vector expressible as combination of others), and (2) span the space (any vector expressible as linear combination of basis vectors). In QM, we use orthonormal bases: ⟨eᵢ|eⱼ⟩ = δᵢⱼ. The number of basis vectors = dimension of the space.</p>`)}
+${makeQ(3, "Write the completeness relation and explain its meaning.", `<div class="answer-formula">Σᵢ |eᵢ⟩⟨eᵢ| = 𝟙 (identity operator)</div><p>This says: inserting a complete set of states gives the identity. Any state can be expanded in this basis: |ψ⟩ = 𝟙|ψ⟩ = Σᵢ |eᵢ⟩⟨eᵢ|ψ⟩ = Σᵢ cᵢ|eᵢ⟩. The completeness relation is crucial for computing matrix elements and transition probabilities.</p>`)}
+${makeQ(4, "What is the dimension of the vector space for a spin-½ particle? What are the basis states?", `<p>A spin-½ particle has a 2-dimensional Hilbert space (2 basis states). The standard orthonormal basis is:</p><div class="answer-formula">|↑⟩ = |+½⟩ (spin-up) and |↓⟩ = |−½⟩ (spin-down)</div><p>Any spin state is: |ψ⟩ = α|↑⟩ + β|↓⟩ where |α|² + |β|² = 1. This is the qubit in quantum computing.</p>`)}
+<div class="topic-nav"><button class="btn-topic-nav next" onclick="loadContent('2-2')"><div class="nav-dir">NEXT</div><div class="nav-title">Hilbert Space & Inner Product →</div></button></div>
+`;}
+
+function makeStubContent(title, moduleLabel, keyFacts, formulas, qs, prevId, prevTitle, nextId, nextTitle) {
+  let content = `<div class="content-title">${title}</div><div class="content-subtitle">${moduleLabel}</div>`;
+  content += makeSection("Core Concepts", `<p>This topic is an essential part of the BAPHY106 curriculum. Study the definitions, mathematical results, and physical interpretations carefully.</p>`);
+  content += makeKeyPoints(keyFacts);
+  formulas.forEach(f => content += makeFormula(f[0], f[1]));
+  content += `<hr class="section-divider"><div class="questions-header">Practice Questions <span>${qs.length} Qs</span></div>`;
+  qs.forEach((q, i) => content += makeQ(i+1, q[0], q[1]));
+  content += `<div class="topic-nav">`;
+  if(prevId) content += `<button class="btn-topic-nav" onclick="loadContent('${prevId}')"><div class="nav-dir">PREV</div><div class="nav-title">← ${prevTitle}</div></button>`;
+  if(nextId) content += `<button class="btn-topic-nav next" onclick="loadContent('${nextId}')"><div class="nav-dir">NEXT</div><div class="nav-title">${nextTitle} →</div></button>`;
+  content += `</div>`;
+  return content;
+}
+
+function content_2_2() { return makeStubContent("Hilbert Space & Inner Product","Module 2 · Mathematical Foundations",
+  ["Hilbert space: complete inner product space — the mathematical arena of QM","Inner product ⟨ψ|φ⟩: complex number generalizing dot product","⟨ψ|φ⟩ = ⟨φ|ψ⟩* (conjugate symmetry)","⟨ψ|ψ⟩ ≥ 0 (positive definiteness); = 0 only if |ψ⟩ = 0","⟨ψ|φ⟩ is linear in |φ⟩ and anti-linear in |ψ⟩","Norm: ||ψ|| = √⟨ψ|ψ⟩ — must be finite for physical states"],
+  [["Inner Product","⟨ψ|φ⟩ = ∫ ψ*(x) φ(x) dx  (continuous)\n⟨ψ|φ⟩ = Σᵢ ψᵢ* φᵢ         (discrete)"]],
+  [["Define Hilbert space and state its key properties.","A Hilbert space ℋ is a complete inner product space over the complex numbers. Key properties: (1) It has an inner product ⟨·|·⟩ that is conjugate-symmetric, linear, and positive-definite. (2) It is complete — all Cauchy sequences converge within the space. (3) Physical quantum states are vectors in Hilbert space. (4) Observables are Hermitian operators on this space. (5) The Hilbert space can be finite- or infinite-dimensional."],
+   ["What is the inner product? Write it explicitly for wave functions.","For quantum states represented as wave functions, the inner product is: <div class='answer-formula'>⟨ψ|φ⟩ = ∫₋∞^∞ ψ*(x) φ(x) dx</div>Properties: (1) ⟨ψ|φ⟩ = ⟨φ|ψ⟩*; (2) ⟨ψ|ψ⟩ ≥ 0 (= 0 only if |ψ⟩=0); (3) Linearity in second argument; (4) ⟨ψ|ψ⟩ = 1 for normalized states. The inner product measures the 'overlap' between states."],
+   ["What is the Cauchy-Schwarz inequality in Hilbert space?","The Cauchy-Schwarz inequality states: |⟨ψ|φ⟩|² ≤ ⟨ψ|ψ⟩·⟨φ|φ⟩. This is fundamental in QM and is the mathematical basis of the Heisenberg Uncertainty Principle. For normalized states: |⟨ψ|φ⟩| ≤ 1, with equality when |ψ⟩ = e^(iθ)|φ⟩."],
+   ["What does it mean for states to be orthogonal in Hilbert space?","Two states |ψ⟩ and |φ⟩ are orthogonal if ⟨ψ|φ⟩ = 0. Physically, orthogonal states represent mutually exclusive outcomes — measuring one gives zero probability for finding the system in the other. Example: ⟨↑|↓⟩ = 0 (spin-up and spin-down are orthogonal). A complete orthonormal basis {|eᵢ⟩} satisfies ⟨eᵢ|eⱼ⟩ = δᵢⱼ."]],
+  "2-1","Linear Vector Space & Basis","2-3","Dirac Notation (Bra-Ket)");}
+
+function content_2_3() { return makeStubContent("Dirac Notation (Bra-Ket)","Module 2 · Mathematical Foundations",
+  ["Ket |ψ⟩: column vector representing quantum state","Bra ⟨ψ|: row vector (conjugate transpose of ket) — the dual","Inner product: ⟨φ|ψ⟩ — a complex number (c-number)","Outer product: |ψ⟩⟨φ| — an operator","Dirac notation unifies all quantum mechanical calculations cleanly","Measurement: probability of outcome aᵢ = |⟨aᵢ|ψ⟩|²"],
+  [["Bra-Ket Summary","|ψ⟩ = ket (state vector)\n⟨ψ| = bra (dual vector)\n⟨φ|ψ⟩ = inner product (c-number)\n|ψ⟩⟨φ| = outer product (operator)\n⟨ψ|A|ψ⟩ = expectation value of operator A"]],
+  [["What are bra and ket vectors? How are they related?","Dirac introduced ket |ψ⟩ as a column vector in Hilbert space representing a quantum state. The bra ⟨ψ| is its dual — the conjugate transpose (row vector). For a ket with components (c₁, c₂, ...), the bra has components (c₁*, c₂*, ...). The inner product ⟨φ|ψ⟩ is obtained by matrix-multiplying the bra ⟨φ| with the ket |ψ⟩: ⟨φ|ψ⟩ = Σᵢ φᵢ*ψᵢ (discrete) or ∫φ*(x)ψ(x)dx (continuous)."],
+   ["What is the outer product and why is it an operator?","The outer product |ψ⟩⟨φ| maps a ket to another ket: (|ψ⟩⟨φ|)|χ⟩ = |ψ⟩⟨φ|χ⟩ = ⟨φ|χ⟩|ψ⟩. Since ⟨φ|χ⟩ is just a number, the result is a scalar multiple of |ψ⟩ — the outer product transforms vectors into vectors → it IS an operator. The projection operator Pᵢ = |eᵢ⟩⟨eᵢ| projects any state onto the basis vector |eᵢ⟩."],
+   ["Write the expectation value of operator A using Dirac notation.","The expectation value of observable A in state |ψ⟩ is: <div class='answer-formula'>⟨A⟩ = ⟨ψ|A|ψ⟩ = ∫ ψ*(x) A ψ(x) dx</div>This is the quantum mechanical average of many measurements of A on identical systems in state |ψ⟩. For a Hermitian operator, ⟨A⟩ is always real."],
+   ["What does |⟨aᵢ|ψ⟩|² represent physically?","⟨aᵢ|ψ⟩ is the inner product of eigenstate |aᵢ⟩ with state |ψ⟩. Its squared modulus |⟨aᵢ|ψ⟩|² gives the <strong>probability</strong> of obtaining eigenvalue aᵢ when measuring observable A on state |ψ⟩. This is the fundamental rule (Born rule) connecting quantum states to measurement outcomes."]],
+  "2-2","Hilbert Space & Inner Product","2-4","Linear Operators & Matrix Algebra");}
+
+function content_2_4() { return makeStubContent("Linear Operators & Matrix Algebra","Module 2 · Mathematical Foundations",
+  ["A linear operator A maps kets to kets: A|ψ⟩ = |ψ'⟩","Linearity: A(α|ψ⟩+β|φ⟩) = αA|ψ⟩ + βA|φ⟩","Matrix element: Aᵢⱼ = ⟨eᵢ|A|eⱼ⟩","Identity operator 𝟙: 𝟙|ψ⟩ = |ψ⟩","Operator product AB ≠ BA in general — non-commutativity is key in QM","Trace: Tr(A) = Σᵢ Aᵢᵢ — invariant under basis change"],
+  [["Matrix Representation","Aᵢⱼ = ⟨eᵢ|A|eⱼ⟩\n(AB)ᵢⱼ = Σₖ AᵢₖBₖⱼ  (matrix multiplication)\n(A†)ᵢⱼ = Aⱼᵢ*  (Hermitian conjugate)"]],
+  [["What is a linear operator in quantum mechanics?","A linear operator A on Hilbert space maps kets to kets: A:|ψ⟩→A|ψ⟩, satisfying linearity: A(α|ψ⟩+β|φ⟩) = αA|ψ⟩+βA|φ⟩. In QM, all observables (energy, momentum, position) are represented by linear operators. In a chosen basis, operators are represented as matrices."],
+   ["How is a matrix element computed? Write the expression.","The matrix element of operator A in the {|eᵢ⟩} basis is: <div class='answer-formula'>Aᵢⱼ = ⟨eᵢ|A|eⱼ⟩ = ∫ eᵢ*(x) A eⱼ(x) dx</div>The full matrix is then [A] with element in row i, column j equal to Aᵢⱼ. Once A is in matrix form, all QM calculations become matrix algebra."],
+   ["What is the Hermitian conjugate (adjoint) A† of operator A?","The Hermitian conjugate A† is defined by ⟨ψ|A†|φ⟩ = ⟨φ|A|ψ⟩*. In matrix form: (A†)ᵢⱼ = Aⱼᵢ* — transpose then complex conjugate. Properties: (AB)† = B†A†, (A†)† = A. Physical observables must be Hermitian (A† = A), ensuring real eigenvalues."],
+   ["Why does operator order matter in quantum mechanics?","For two operators A and B, in general AB ≠ BA. The commutator [A,B] = AB − BA ≠ 0 signals non-commutativity. Example: [x̂, p̂] = iℏ (position and momentum). Non-commutativity is the mathematical basis of the Heisenberg Uncertainty Principle — incompatible observables cannot simultaneously have definite values."]],
+  "2-3","Dirac Notation","2-5","Hermitian, Unitary & Projection Operators");}
+
+function content_2_5() { return makeStubContent("Hermitian, Unitary & Projection Operators","Module 2 · Mathematical Foundations",
+  ["Hermitian (self-adjoint): A† = A → real eigenvalues → physical observables","Unitary: U†U = UU† = 𝟙 → preserves norms → describes time evolution & gates","Projection: P² = P = P† → projects onto a subspace","All quantum gates are unitary (reversible)",
+   "Hermitian operators: position, momentum, energy, spin components"],
+  [["Key Operator Types","Hermitian:    A† = A,   eigenvalues real\nUnitary:      U†U = 𝟙, preserves inner products\nProjection:   P² = P = P†, eigenvalues 0 or 1"]],
+  [["What is a Hermitian operator? Why must observables be Hermitian?","A Hermitian operator satisfies A† = A (or equivalently, ⟨ψ|A|φ⟩ = ⟨φ|A|ψ⟩*). Properties: (1) Eigenvalues are always real — crucial since physical measurement outcomes must be real numbers. (2) Eigenvectors with different eigenvalues are orthogonal. (3) They form a complete orthonormal basis. Since measurements yield real numbers, observables must be Hermitian."],
+   ["What is a unitary operator? Give examples.","A unitary operator U satisfies U†U = UU† = 𝟙. Properties: (1) Preserves inner products: ⟨Uψ|Uφ⟩ = ⟨ψ|φ⟩. (2) Preserves norms: ||U|ψ⟩|| = |||ψ⟩||. (3) Eigenvalues lie on the unit circle in complex plane. Examples: time evolution operator e^(−iHt/ℏ), quantum gate matrices (Hadamard, CNOT, Pauli gates). All quantum gates are unitary."],
+   ["What is a projection operator? How is it constructed?","A projection operator P onto state |ψ⟩ is: P = |ψ⟩⟨ψ|. Properties: P² = P (idempotent), P† = P (Hermitian). Effect: P|φ⟩ = |ψ⟩⟨ψ|φ⟩ — projects |φ⟩ onto |ψ⟩. Eigenvalues: 1 (for states in the subspace) or 0 (orthogonal states). The measurement postulate: upon measuring observable A, the system projects onto the eigenstate corresponding to the measured eigenvalue."],
+   ["Prove that eigenvalues of a Hermitian operator are real.","Let A|ψ⟩ = λ|ψ⟩ (|ψ⟩ ≠ 0). Taking inner product with ⟨ψ|: ⟨ψ|A|ψ⟩ = λ⟨ψ|ψ⟩. Since A is Hermitian: ⟨ψ|A|ψ⟩ = ⟨Aψ|ψ⟩ = (λ⟨ψ|ψ⟩)* = λ*⟨ψ|ψ⟩. So λ⟨ψ|ψ⟩ = λ*⟨ψ|ψ⟩ → λ = λ* (since ⟨ψ|ψ⟩ > 0) → λ is real. ∎"]],
+  "2-4","Linear Operators & Matrix Algebra","2-6","Eigenvalues & Eigenvectors");}
+
+function content_2_6() { return makeStubContent("Eigenvalues & Eigenvectors","Module 2 · Mathematical Foundations",
+  ["A|ψ⟩ = λ|ψ⟩: |ψ⟩ is eigenvector, λ is eigenvalue","Eigenvalues of Hermitian operators: always real","Eigenvectors of Hermitian operators with different eigenvalues: orthogonal","Complete set: eigenvectors form a basis for the Hilbert space","Measurement postulate: measuring A yields eigenvalue λₙ with prob |⟨λₙ|ψ⟩|²","Degenerate: multiple eigenvectors sharing the same eigenvalue"],
+  [["Eigenvalue Equation","A|ψₙ⟩ = λₙ|ψₙ⟩\nMatrix form: det(A − λI) = 0  (characteristic equation)"]],
+  [["What is an eigenvalue equation in quantum mechanics?","The eigenvalue equation is A|ψₙ⟩ = λₙ|ψₙ⟩, where A is a linear operator (observable), |ψₙ⟩ is the eigenstate (eigenvector), and λₙ is the eigenvalue (the definite measurement outcome). When the system is in eigenstate |ψₙ⟩, measuring A always gives λₙ with certainty (probability = 1). For any other state, measurement gives random eigenvalues with probabilities |⟨ψₙ|ψ⟩|²."],
+   ["How are eigenvalues found from the matrix representation?","Eigenvalues are solutions to the characteristic equation: det(A − λI) = 0. This polynomial in λ has degree n (for n×n matrix), giving n eigenvalues (counting multiplicity). For each eigenvalue λₙ, the eigenvector |ψₙ⟩ satisfies (A − λₙI)|ψₙ⟩ = 0. In QM, these are the Schrödinger equation solutions: Ĥ|Eₙ⟩ = Eₙ|Eₙ⟩."],
+   ["What is degeneracy in quantum mechanics?","Degeneracy occurs when two or more linearly independent eigenstates share the same eigenvalue: A|ψₙᵃ⟩ = λₙ|ψₙᵃ⟩ and A|ψₙᵇ⟩ = λₙ|ψₙᵇ⟩ with |ψₙᵃ⟩ ≠ |ψₙᵇ⟩. Any linear combination α|ψₙᵃ⟩ + β|ψₙᵇ⟩ is also an eigenstate with the same eigenvalue. Physical example: in 3-D box, states (2,1,1), (1,2,1), (1,1,2) have the same energy → 3-fold degenerate."],
+   ["State the spectral theorem for Hermitian operators.","The Spectral Theorem: Every Hermitian operator A has a complete set of orthonormal eigenstates {|aₙ⟩} with real eigenvalues {aₙ}. Any state in the Hilbert space can be expanded: |ψ⟩ = Σₙ cₙ|aₙ⟩, where cₙ = ⟨aₙ|ψ⟩. The operator can be written as A = Σₙ aₙ|aₙ⟩⟨aₙ| (spectral decomposition). This is why Hermitian operators are the mathematical representation of physical observables."]],
+  "2-5","Hermitian, Unitary & Projection Operators","2-7","Pauli Matrices & Applications");}
+
+function content_2_7() { return makeStubContent("Pauli Matrices & Applications","Module 2 · Mathematical Foundations",
+  ["Three 2×2 Hermitian, unitary, traceless matrices representing spin-½","σ²ₓ = σ²ᵧ = σ²_z = 𝟙 (square of any Pauli matrix = identity)","Anti-commutation: {σᵢ, σⱼ} = 2δᵢⱼ𝟙","Commutation: [σᵢ, σⱼ] = 2iεᵢⱼₖσₖ","Pauli matrices → quantum gates (X, Y, Z gates in quantum computing)","Eigenvalues of all Pauli matrices: ±1"],
+  [["Pauli Matrices","σₓ = [[0,1],[1,0]]    (X gate)\nσᵧ = [[0,−i],[i,0]]  (Y gate)\nσ_z = [[1,0],[0,−1]]  (Z gate)"]],
+  [["Write the three Pauli matrices and state their properties.","The Pauli matrices are: σₓ = [[0,1],[1,0]], σᵧ = [[0,−i],[i,0]], σ_z = [[1,0],[0,−1]]. Properties: (1) Hermitian: σᵢ† = σᵢ; (2) Unitary: σᵢ†σᵢ = 𝟙; (3) Traceless: Tr(σᵢ) = 0; (4) σᵢ² = 𝟙; (5) Det(σᵢ) = −1; (6) Eigenvalues ±1."],
+   ["Prove the commutation relation [σₓ, σᵧ] = 2iσ_z.","[σₓ,σᵧ] = σₓσᵧ − σᵧσₓ. Computing: σₓσᵧ = [[0,1],[1,0]][[0,−i],[i,0]] = [[i,0],[0,−i]] = iσ_z. σᵧσₓ = [[0,−i],[i,0]][[0,1],[1,0]] = [[−i,0],[0,i]] = −iσ_z. Therefore [σₓ,σᵧ] = iσ_z − (−iσ_z) = 2iσ_z. ∎ Generally: [σᵢ,σⱼ] = 2iεᵢⱼₖσₖ."],
+   ["What are the eigenstates of σ_z and σₓ?","Eigenstates of σ_z: |↑⟩=[1,0] with eigenvalue +1; |↓⟩=[0,1] with eigenvalue −1. Eigenstates of σₓ: |+x⟩=(1/√2)[1,1] with eigenvalue +1; |−x⟩=(1/√2)[1,−1] with eigenvalue −1. Eigenstates of σᵧ: |+y⟩=(1/√2)[1,i] with eigenvalue +1; |−y⟩=(1/√2)[1,−i] with eigenvalue −1."],
+   ["How are Pauli matrices used in quantum computing?","In quantum computing, Pauli matrices represent fundamental single-qubit gates: σₓ = X gate (bit flip: |0⟩↔|1⟩), σᵧ = Y gate (combined bit and phase flip), σ_z = Z gate (phase flip: |1⟩→−|1⟩). All single-qubit unitary gates can be expressed as U = e^(iθ(n̂·σ⃗)) — rotation on the Bloch sphere — using Pauli matrices. They form a complete basis for 2×2 Hermitian matrices."]],
+  "2-6","Eigenvalues & Eigenvectors","2-8","Commutation Relations");}
+
+function content_2_8() { return makeStubContent("Commutation Relations","Module 2 · Mathematical Foundations",
+  ["Commutator [A,B] = AB − BA: zero if simultaneously measurable","[x̂, p̂] = iℏ — fundamental canonical commutation relation","[x̂, p̂] = iℏ is the algebraic source of Heisenberg Uncertainty Principle","If [A,B] = 0: A and B share eigenstates (simultaneously observable)","Angular momentum: [Lₓ,Lᵧ] = iℏL_z, [Lᵧ,L_z] = iℏLₓ, [L_z,Lₓ] = iℏLᵧ","[H,A] = 0 means A is conserved (constant of motion)"],
+  [["Fundamental Commutation Relations","[x̂, p̂] = iℏ  (position-momentum)\n[Lᵢ, Lⱼ] = iℏεᵢⱼₖLₖ  (angular momentum)\n[σᵢ, σⱼ] = 2iεᵢⱼₖσₖ  (Pauli matrices)"]],
+  [["What is a commutator? What does it mean for two operators to commute?","The commutator of operators A and B is [A,B] = AB − BA. If [A,B] = 0, A and B commute: they share a complete set of eigenstates and can be simultaneously measured with certainty (compatible observables). If [A,B] ≠ 0, they are incompatible (cannot be simultaneously measured precisely) — the source of the Uncertainty Principle."],
+   ["State and explain the canonical commutation relation [x̂,p̂] = iℏ.","The position operator x̂ and momentum operator p̂ = −iℏ(∂/∂x) satisfy: [x̂,p̂]ψ = x(−iℏ∂ψ/∂x) − (−iℏ∂/∂x)(xψ) = −iℏx(∂ψ/∂x) + iℏ(ψ + x∂ψ/∂x) = iℏψ. So [x̂,p̂] = iℏ. This is the fundamental commutation relation of QM, encoding the non-commutativity that gives rise to: Δx·Δp ≥ ℏ/2."],
+   ["If [A,B] = 0, what can you conclude about their measurement?","If [A,B] = 0: (1) A and B share simultaneous eigenstates |aₙ,bₘ⟩ with A|aₙ,bₘ⟩ = aₙ|aₙ,bₘ⟩ and B|aₙ,bₘ⟩ = bₘ|aₙ,bₘ⟩. (2) Measuring A does not disturb the value of B. (3) Both A and B can be simultaneously specified with zero uncertainty. Example: Ĥ and L² commute in spherically symmetric potentials → energy and total angular momentum can be simultaneously defined."],
+   ["State the uncertainty relation derived from commutators.","For any two observables A and B: ΔA · ΔB ≥ ½|⟨[A,B]⟩|. This is the Robertson-Schrödinger uncertainty relation. Substituting [x̂,p̂] = iℏ: Δx·Δp ≥ ½|⟨iℏ⟩| = ℏ/2. For [Lₓ,Lᵧ] = iℏL_z: ΔLₓ·ΔLᵧ ≥ ℏ/2|⟨L_z⟩|. The Uncertainty Principle is thus a direct consequence of non-commutativity."]],
+  "2-7","Pauli Matrices & Applications","3-1","State Vector Representation");}
+
+/* --- MODULE 3 --- */
+function content_3_1() { return makeStubContent("State Vector Representation","Module 3 · Postulates of QM",
+  ["The quantum state |ψ⟩ contains ALL information about the system","State vectors live in Hilbert space; superposition is allowed","Superposition: |ψ⟩ = Σ cₙ|ψₙ⟩ — weighted sum of basis states","|cₙ|² = probability of finding system in state |ψₙ⟩","After measurement → state 'collapses' to the measured eigenstate (postulate)","Density matrix ρ = |ψ⟩⟨ψ| extends to mixed states"],
+  [["State Vector & Superposition","|ψ⟩ = c₁|ψ₁⟩ + c₂|ψ₂⟩ + ... = Σₙ cₙ|ψₙ⟩\nNormalization: Σₙ |cₙ|² = 1\nProbability of outcome n: Pₙ = |cₙ|² = |⟨ψₙ|ψ⟩|²"]],
+  [["What is a state vector? How is it related to the wave function?","A state vector |ψ⟩ is an abstract vector in Hilbert space that completely describes the quantum state of a system. In position representation, the components of |ψ⟩ in the continuous position basis are the wave function: ψ(x) = ⟨x|ψ⟩. The state vector is more general — it exists independently of any representation, while the wave function is its expression in position space."],
+   ["Explain the superposition principle in quantum mechanics.","The superposition principle: if |ψ₁⟩ and |ψ₂⟩ are valid quantum states, then any linear combination |ψ⟩ = c₁|ψ₁⟩ + c₂|ψ₂⟩ is also a valid quantum state (for any complex c₁, c₂ with |c₁|² + |c₂|² = 1). This is fundamentally non-classical — a particle can be in multiple states simultaneously. Example: Schrödinger's cat, qubit in |0⟩ + |1⟩, or an electron in a superposition of two spin states."],
+   ["What is state collapse (reduction of the wave packet)?","State collapse (or wave function collapse) is the postulate that upon measuring observable A on state |ψ⟩ = Σcₙ|aₙ⟩: (1) The result is one of the eigenvalues aₙ, with probability |cₙ|². (2) Immediately after measurement, the state 'collapses' to the corresponding eigenstate |aₙ⟩. Subsequent measurement of A immediately after gives the same result with certainty. This is the measurement postulate — the most controversial aspect of QM."],
+   ["Why is superposition not observable for macroscopic objects?","Macroscopic objects interact with their environment through an enormous number of degrees of freedom. This environmental interaction causes decoherence — the superposition phases average to zero extremely rapidly (decoherence time << observational timescale). The object appears classical because quantum interference terms are destroyed. Only carefully isolated systems (qubits in quantum computers, atoms in traps) maintain quantum superposition long enough to be exploited."]],
+  "2-8","Commutation Relations","3-2","Measurement Postulate & Observables");}
+
+function content_3_2() { return makeStubContent("Measurement Postulate & Observables","Module 3 · Postulates of QM",
+  ["Observable: physical measurable quantity → Hermitian operator in QM","Measurement postulate: measuring A on |ψ⟩ yields eigenvalue aₙ with prob |⟨aₙ|ψ⟩|²","After measurement → state collapses to |aₙ⟩","Incompatible observables (non-commuting): cannot simultaneously measure","Compatible observables (commuting): can simultaneously measure","Expectation value ⟨A⟩ = ⟨ψ|A|ψ⟩ = quantum average"],
+  [["Measurement Postulate","If |ψ⟩ = Σₙ cₙ|aₙ⟩  and  A|aₙ⟩ = aₙ|aₙ⟩\nP(aₙ) = |cₙ|² = |⟨aₙ|ψ⟩|²  (probability of getting aₙ)\nAfter measurement: |ψ⟩ → |aₙ⟩  (state collapse)\n⟨A⟩ = Σₙ aₙ|cₙ|² = ⟨ψ|A|ψ⟩"]],
+  [["State the measurement postulate of quantum mechanics.","The measurement postulate (Born Rule): If an observable A has eigenvalues {aₙ} with eigenstates {|aₙ⟩}, and the system is in state |ψ⟩ = Σcₙ|aₙ⟩, then: (1) The only possible measurement outcomes are eigenvalues aₙ. (2) Probability of outcome aₙ is P(aₙ) = |⟨aₙ|ψ⟩|² = |cₙ|². (3) After obtaining aₙ, the state collapses to |aₙ⟩. The expectation value ⟨A⟩ = Σₙ aₙ|cₙ|² = ⟨ψ|A|ψ⟩."],
+   ["What is an observable in quantum mechanics?","An observable is any physical quantity that can be measured — position, momentum, energy, spin, etc. In QM, each observable corresponds to a Hermitian (self-adjoint) operator. The requirement of Hermiticity ensures: (1) All eigenvalues (measurement outcomes) are real numbers. (2) Eigenstates form a complete orthonormal basis. (3) Time evolution preserves the completeness."],
+   ["What happens when you measure the same observable twice in rapid succession?","If you measure observable A and obtain result aₙ, the system collapses to eigenstate |aₙ⟩. If you immediately measure A again, the system is already in |aₙ⟩, and the only possible outcome is aₙ again (with probability 1). This is called the repeatability/reproducibility of quantum measurements. However, if you measure a different non-commuting observable B between the two A measurements, the first result is disturbed."],
+   ["Explain compatible vs. incompatible observables.","Compatible observables: [A,B] = 0 → share eigenstates → both can be measured simultaneously with precision. Example: energy E and total angular momentum L² in a central potential. Incompatible observables: [A,B] ≠ 0 → no shared eigenstates → measuring one disturbs the other. Example: [x̂,p̂] = iℏ — position and momentum are incompatible. Measuring x precisely makes p maximally uncertain."]],
+  "3-1","State Vector Representation","3-3","Expectation Values");}
+
+function content_3_3() { return makeStubContent("Expectation Values","Module 3 · Postulates of QM",
+  ["⟨A⟩: quantum mechanical average of observable A over many measurements","⟨A⟩ = ⟨ψ|A|ψ⟩ = ∫ψ*(x) A ψ(x) dx","⟨A⟩ is always real for Hermitian A","Uncertainty: (ΔA)² = ⟨A²⟩ − ⟨A⟩²","Ehrenfest theorem: expectation values follow classical equations of motion","⟨x⟩, ⟨p⟩ evolve like classical position and momentum"],
+  [["Expectation Value & Uncertainty","⟨A⟩ = ⟨ψ|A|ψ⟩\n(ΔA)² = ⟨A²⟩ − ⟨A⟩²  (variance)\nΔA = √(⟨A²⟩ − ⟨A⟩²)  (standard deviation/uncertainty)"]],
+  [["Define expectation value and write its formula.","The expectation value ⟨A⟩ of observable A in state |ψ⟩ is: <div class='answer-formula'>⟨A⟩ = ⟨ψ|A|ψ⟩ = ∫₋∞^∞ ψ*(x) A ψ(x) dx</div>It is the quantum mechanical average — if you prepare many identical systems in state |ψ⟩ and measure A on each, ⟨A⟩ is the average of all results. Note: ⟨A⟩ may not be an eigenvalue of A."],
+   ["Define the uncertainty ΔA of an observable.","The uncertainty (standard deviation) of observable A in state |ψ⟩ is: <div class='answer-formula'>(ΔA)² = ⟨(A−⟨A⟩)²⟩ = ⟨A²⟩ − ⟨A⟩²</div>ΔA measures the spread of measurement results around the mean. ΔA = 0 iff the state is an eigenstate of A (definite outcome). The Heisenberg Uncertainty Principle: ΔxΔp ≥ ℏ/2 is expressed in terms of these uncertainties."],
+   ["State Ehrenfest's theorem and its physical significance.","Ehrenfest's theorem: the expectation values of position and momentum obey classical equations of motion: d⟨x⟩/dt = ⟨p⟩/m and d⟨p⟩/dt = −⟨∂V/∂x⟩. This shows that the quantum mechanical center of the wave packet follows classical trajectory — quantum mechanics reproduces classical mechanics for expectation values. This bridges quantum and classical descriptions (Correspondence Principle in action)."],
+   ["Calculate ⟨x⟩ and ⟨p⟩ for a free particle wave packet.","For a Gaussian wave packet ψ(x,0) = A·exp(−x²/4σ²)·exp(ik₀x): ⟨x⟩ = 0 (centered at origin, by symmetry). ⟨p⟩ = ℏk₀ (mean momentum from de Broglie). Uncertainty: Δx = σ, Δp = ℏ/2σ, giving ΔxΔp = ℏ/2 — the Gaussian packet is a minimum uncertainty state. As the packet evolves, ⟨x⟩(t) = ℏk₀t/m (moves with group velocity = classical velocity) demonstrating Ehrenfest's theorem."]],
+  "3-2","Measurement Postulate & Observables","3-4","Schrödinger Wave Equation (Derivation)");}
+
+function content_3_4() { return `
+<div class="content-title">Schrödinger Wave Equation — Derivation</div>
+<div class="content-subtitle">Module 3 · Postulates of Quantum Mechanics</div>
+${makeSection("Overview", `<p>The Schrödinger equation is the central equation of non-relativistic quantum mechanics — analogous to Newton's F=ma for quantum systems. Erwin Schrödinger (1926) derived it by combining de Broglie's matter wave hypothesis with the classical wave equation. There are <strong>two forms</strong>: Time-Independent (TISE) and Time-Dependent (TDSE).</p>`)}
+${makeSection("Assumptions for Derivation", `<p>Schrödinger's derivation rests on:</p>`)}
+${makeKeyPoints([
+  "de Broglie wavelength applies to matter waves: TE = PE + KE → E = V + p²/2m",
+  "The wave function: Ψ = Ψ₀ e^(−iωt)",
+  "The progressive wave equation in 3D: ∂²Ψ/∂x² + ∂²Ψ/∂y² + ∂²Ψ/∂z² = (1/u²)(∂²Ψ/∂t²)"
+])}
+${makeSection("Derivation of Time-Independent Schrödinger Equation", `<p><strong>Step 1:</strong> Start with total energy: E = V + p²/2m → p = √[2m(E−V)]</p>
+<p><strong>Step 2:</strong> de Broglie: λ = h/p = h/√[2m(E−V)]</p>
+<p><strong>Step 3:</strong> Wave function: Ψ = Ψ₀e^(−iωt). Differentiating twice w.r.t. t: ∂²Ψ/∂t² = −ω²Ψ</p>
+<p><strong>Step 4:</strong> Substituting into the wave equation with u = νλ, ω = 2πν:</p>`)}
+${makeFormula("Intermediate Steps", `∇²Ψ = −(ω²/u²)Ψ = −(4π²ν²/u²)Ψ = −(4π²/λ²)Ψ
+Substituting λ = h/√[2m(E−V)]:
+∇²Ψ = −(4π²/h²) × 2m(E−V) × Ψ`)}
+${makeFormula("Time-Independent Schrödinger Equation (TISE)", `∇²Ψ + (8π²m/h²)(E−V)Ψ = 0
+Or equivalently:
+∇²Ψ + (2m/ℏ²)(E−V)Ψ = 0     [ℏ = h/2π]
+Compact form: Ĥψ = Eψ  where Ĥ = −(ℏ²/2m)∇² + V`)}
+${makeSection("Derivation of Time-Dependent Schrödinger Equation", `<p>Starting from TISE and Ψ = Ψ₀e^(−iωt). Differentiating: ∂Ψ/∂t = −iωΨ = −i(2πν)Ψ. Using E = hν: ∂Ψ/∂t = −(i2πE/h)Ψ = −(iE/ℏ)Ψ. Therefore <strong>EΨ = iℏ(∂Ψ/∂t)</strong>.</p>
+<p>Substituting into TISE:</p>`)}
+${makeFormula("Time-Dependent Schrödinger Equation (TDSE)", `−(ℏ²/2m)∇²Ψ + VΨ = iℏ(∂Ψ/∂t)
+Or: ĤΨ = iℏ(∂Ψ/∂t)
+This is the most general form — governs all quantum dynamics.`)}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>6 Qs</span></div>
+${makeQ(1, "State the time-independent Schrödinger equation and identify each term.",
+  `<div class="answer-formula">∇²Ψ + (2m/ℏ²)(E−V)Ψ = 0  or  Ĥψ = Eψ</div>
+  <p><strong>∇²</strong>: Laplacian operator = ∂²/∂x² + ∂²/∂y² + ∂²/∂z² (spatial second derivatives)</p>
+  <p><strong>Ψ</strong>: wave function — depends on position only (time eliminated)</p>
+  <p><strong>m</strong>: mass of the particle</p>
+  <p><strong>ℏ</strong>: reduced Planck's constant = h/2π</p>
+  <p><strong>E</strong>: total energy of the particle (eigenvalue)</p>
+  <p><strong>V</strong>: potential energy (function of position)</p>
+  <p><strong>Ĥ = −(ℏ²/2m)∇² + V</strong>: Hamiltonian operator (total energy operator)</p>`
+)}
+${makeQ(2, "What are the two forms of Schrödinger equation? When is each used?",
+  `<p><strong>Time-Independent Schrödinger Equation (TISE):</strong> ∇²ψ + (2m/ℏ²)(E−V)ψ = 0. Used when V does not depend on time (stationary states). Solutions are energy eigenstates with definite energy E. Examples: particle in a box, harmonic oscillator, hydrogen atom.</p>
+  <p><strong>Time-Dependent Schrödinger Equation (TDSE):</strong> −(ℏ²/2m)∇²Ψ + VΨ = iℏ(∂Ψ/∂t). The most general equation — governs all quantum dynamics, including time-varying potentials. The TISE is recovered by separating variables (Ψ = ψ(x)e^(−iEt/ℏ)) when V is time-independent.</p>`
+)}
+${makeQ(3, "Derive the relation EΨ = iℏ(∂Ψ/∂t).",
+  `<p>The wave function has the form: Ψ = Ψ₀ e^(−iωt)</p>
+  <p>Differentiating with respect to time:</p>
+  <div class="answer-formula">∂Ψ/∂t = −iω · Ψ₀e^(−iωt) = −iωΨ</div>
+  <p>Using Planck's relation E = hν = ℏω: ω = E/ℏ</p>
+  <div class="answer-formula">∂Ψ/∂t = −i(E/ℏ)Ψ → EΨ = iℏ(∂Ψ/∂t)</div>
+  <p>This allows replacing the energy E in the TISE with the operator iℏ(∂/∂t), yielding the TDSE.</p>`
+)}
+${makeQ(4, "What is the Hamiltonian operator Ĥ? Write its explicit form.",
+  `<p>The Hamiltonian operator is the quantum mechanical operator corresponding to total energy:</p>
+  <div class="answer-formula">Ĥ = KE operator + PE operator = −(ℏ²/2m)∇² + V(r)</div>
+  <p>In 1D: Ĥ = −(ℏ²/2m)(∂²/∂x²) + V(x)</p>
+  <p>In 3D: Ĥ = −(ℏ²/2m)(∂²/∂x² + ∂²/∂y² + ∂²/∂z²) + V(x,y,z)</p>
+  <p>The TISE is the eigenvalue equation: Ĥψ = Eψ. The TDSE is: ĤΨ = iℏ(∂Ψ/∂t). The Hamiltonian is Hermitian, ensuring real energy eigenvalues.</p>`
+)}
+${makeQ(5, "What are the key assumptions in deriving the Schrödinger equation?",
+  `<p>Schrödinger's derivation assumes:</p>
+  <p>1. de Broglie's wavelength: λ = h/p applies to matter waves for any type of field.</p>
+  <p>2. Total energy: E = V + p²/2m (non-relativistic).</p>
+  <p>3. Wave function form: Ψ = Ψ₀e^(−iωt) — plane wave time dependence.</p>
+  <p>4. Classical wave equation: ∇²Ψ = (1/u²)(∂²Ψ/∂t²) holds for matter waves.</p>
+  <p>5. Wave velocity: u = νλ.</p>
+  <p>Note: The Schrödinger equation cannot be strictly "derived" from classical physics — it is fundamentally a postulate of quantum mechanics, whose correctness is validated by its extraordinary agreement with experiment.</p>`
+)}
+${makeQ(6, "What is the physical significance of the Hamiltonian operator in quantum mechanics?",
+  `<p>The Hamiltonian Ĥ = −(ℏ²/2m)∇² + V is the most important operator in quantum mechanics:</p>
+  <p>1. <strong>Energy observable:</strong> Its eigenvalues are the allowed energies of the system. Ĥψₙ = Eₙψₙ.</p>
+  <p>2. <strong>Time evolution generator:</strong> The TDSE ĤΨ = iℏ(∂Ψ/∂t) shows Ĥ generates time evolution: Ψ(t) = e^(−iĤt/ℏ)Ψ(0).</p>
+  <p>3. <strong>Conservation:</strong> If [Ĥ,A] = 0, observable A is conserved in time.</p>
+  <p>4. <strong>Structure of solutions:</strong> Stationary states Ψₙ(x,t) = ψₙ(x)e^(−iEₙt/ℏ) are energy eigenstates with definite energy — they have time-independent probability densities |Ψ|².</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('3-3')"><div class="nav-dir">PREV</div><div class="nav-title">← Expectation Values</div></button>
+  <button class="btn-topic-nav next" onclick="loadContent('3-5')"><div class="nav-dir">NEXT</div><div class="nav-title">TISE →</div></button>
+</div>`;}
+
+function content_3_5() { return makeStubContent("Time-Independent Schrödinger Equation","Module 3 · Postulates of QM",
+  ["∇²ψ + (2m/ℏ²)(E−V)ψ = 0  or  Ĥψ = Eψ","Applies to stationary states: time-independent V(r)","Solutions ψₙ(x) are energy eigenfunctions","Energy eigenvalues Eₙ are the allowed (quantized) energies","Stationary state: Ψ(x,t) = ψ(x)·e^(−iEt/ℏ) — time appears only as phase","For free particle (V=0): plane wave solutions"],
+  [["TISE","−(ℏ²/2m)(d²ψ/dx²) + V(x)ψ = Eψ\nFor free particle (V=0):  d²ψ/dx² + k²ψ = 0,  k = √(2mE)/ℏ\nGeneral solution:  ψ(x) = A·sin(kx) + B·cos(kx)"]],
+  [["Write and explain the time-independent Schrödinger equation.","The TISE: <div class='answer-formula'>−(ℏ²/2m)∇²ψ + Vψ = Eψ  →  Ĥψ = Eψ</div>It is an eigenvalue equation for the Hamiltonian Ĥ. Solutions ψₙ are eigenfunctions (stationary states) and Eₙ are eigenvalues (quantized energies). It applies when V is time-independent. The full time-dependent solution is Ψ(x,t) = ψ(x)e^(−iEt/ℏ) — only the phase oscillates in time, so |Ψ|² = |ψ|² is time-independent."],
+   ["What is a stationary state? Why is |Ψ|² time-independent?","A stationary state is an energy eigenstate: Ψₙ(x,t) = ψₙ(x)e^(−iEₙt/ℏ). Its probability density: |Ψₙ|² = |ψₙ(x)|² · |e^(−iEₙt/ℏ)|² = |ψₙ(x)|² — time-independent! This is why they are 'stationary' — the probability distribution doesn't evolve. However, a superposition of two stationary states is NOT stationary — it oscillates at the beat frequency (E₂−E₁)/ℏ."],
+   ["Solve the TISE for a free particle (V=0). What are the solutions?","For V=0: d²ψ/dx² + k²ψ = 0, where k = √(2mE)/ℏ. General solutions: ψ(x) = A·e^(ikx) + B·e^(−ikx) (complex exponential form) or A·sin(kx) + B·cos(kx) (real form). These represent plane waves traveling in ±x directions. Unlike the box case, there are no boundary conditions → k (and hence E) can take any positive value → free particle energy is continuous (not quantized). Full solution: Ψ(x,t) = A·e^(i(kx−ωt)) with ω = E/ℏ."],
+   ["What is the separation of variables technique for solving the TISE?","For time-independent V, write Ψ(x,t) = ψ(x)·f(t). Substituting into TDSE: iℏ(∂Ψ/∂t) = −(ℏ²/2m)(d²ψ/dx²)f + Vψf. Dividing by Ψ: iℏ(df/dt)/f = [−(ℏ²/2m)(d²ψ/dx²)/ψ + V] = E (separation constant = energy). This gives: f(t) = e^(−iEt/ℏ) and −(ℏ²/2m)(d²ψ/dx²) + Vψ = Eψ (TISE). The two equations are independent — only the TISE needs to be solved for each problem."]],
+  "3-4","Schrödinger Wave Equation (Derivation)","3-6","Time-Dependent Schrödinger Equation");}
+
+function content_3_6() { return makeStubContent("Time-Dependent Schrödinger Equation","Module 3 · Postulates of QM",
+  ["ĤΨ = iℏ(∂Ψ/∂t) — governs all quantum dynamics","Valid for time-varying potentials too","EΨ = iℏ(∂Ψ/∂t) → energy operator is iℏ(∂/∂t)","Probability current J: ∂|Ψ|²/∂t + ∇·J = 0 (continuity equation)","Time evolution unitary: Ψ(t) = e^(−iĤt/ℏ)Ψ(0)","Superposition of stationary states → time-evolving probability"],
+  [["TDSE","ĤΨ = iℏ(∂Ψ/∂t)\n−(ℏ²/2m)∇²Ψ + VΨ = iℏ(∂Ψ/∂t)\nEnergy operator: Ê = iℏ(∂/∂t)"]],
+  [["State the time-dependent Schrödinger equation and identify all terms.","TDSE: −(ℏ²/2m)∇²Ψ + VΨ = iℏ(∂Ψ/∂t). Left side: Ĥ = −(ℏ²/2m)∇² + V is the Hamiltonian. Right side: iℏ(∂/∂t) is the energy operator. Ψ(x,y,z,t): full time-dependent wave function. Key features: (1) First order in time (unlike classical wave equation which is second order). (2) Complex — requires complex wave functions. (3) Linear — superposition holds."],
+   ["How does a superposition of energy eigenstates evolve in time?","For Ψ(x,0) = Σₙ cₙψₙ(x), the time evolution is: Ψ(x,t) = Σₙ cₙψₙ(x)e^(−iEₙt/ℏ). The probability density |Ψ|² = |Σcₙψₙe^(−iEₙt/ℏ)|² contains cross terms that oscillate at beat frequencies (Eₘ−Eₙ)/ℏ. This time evolution is what describes quantum transitions, quantum beats, and Rabi oscillations."],
+   ["Derive the energy operator from the TDSE.","From Ψ = Ψ₀e^(−iEt/ℏ): ∂Ψ/∂t = −(iE/ℏ)Ψ → iℏ(∂Ψ/∂t) = EΨ. Therefore the energy operator is Ê = iℏ(∂/∂t). Similarly, momentum operator: p̂ = −iℏ(∂/∂x), and position operator: x̂ = x. These operator correspondences (classical quantity → quantum operator) are how quantum mechanics is systematically constructed from classical physics."],
+   ["What is the probability current J? State the continuity equation.","Probability current: J = (ℏ/2mi)(Ψ*∇Ψ − Ψ∇Ψ*). Continuity equation: ∂ρ/∂t + ∇·J = 0, where ρ = |Ψ|². This is conservation of probability — probability cannot be created or destroyed, only flows. The continuity equation follows directly from the TDSE and confirms that total probability ∫|Ψ|²dV remains 1 at all times (unitarity of quantum evolution)."]],
+  "3-5","Time-Independent Schrödinger Equation","4-1","Particle in a 1-D Box");}
+
+/* --- MODULE 4 --- */
+function content_4_1() { return `
+<div class="content-title">Particle in a 1-D Box (Infinite Potential Well)</div>
+<div class="content-subtitle">Module 4 · Applications of Quantum Mechanics</div>
+${makeSection("The Problem Setup", `<p>The particle in a 1-D box (or infinite potential well) is the simplest application of the Schrödinger equation. It models a particle of mass m moving freely between two impenetrable walls at x = 0 and x = a.</p>`)}
+${makeFormula("Potential Energy", `V(x) = 0    for  0 < x < a   (inside box, free motion)
+V(x) = ∞   for  x ≤ 0 or x ≥ a  (walls — particle cannot escape)`)}
+${makeSection("Applying the Schrödinger Equation", `<p><strong>Inside the box (V=0):</strong> TISE becomes d²ψ/dx² + k²ψ = 0, where k² = 2mE/ℏ².
+General solution: ψ(x) = A sin(kx) + B cos(kx).</p>
+<p><strong>Boundary conditions:</strong> ψ(0) = 0 and ψ(a) = 0 (wave function vanishes at walls where V=∞).</p>
+<p>At x=0: ψ(0) = B·cos(0) = B = 0 → <strong>B = 0</strong>.</p>
+<p>At x=a: ψ(a) = A sin(ka) = 0. Since A ≠ 0, sin(ka) = 0 → ka = nπ → <strong>k = nπ/a</strong>, n = 1,2,3,...</p>`)}
+${makeFormula("Wave Function (before normalization)", `ψ(x) = A·sin(nπx/a)`)}
+${makeSection("Normalization", `<p>Apply ∫₀ᵃ |ψ|² dx = 1 to find A. Integrating A²sin²(nπx/a) from 0 to a using sin²θ = (1−cos2θ)/2 gives A²·a/2 = 1 → <strong>A = √(2/a)</strong>.</p>`)}
+${makeFormula("Normalized Eigenfunction", `ψₙ(x) = √(2/a) · sin(nπx/a)   for 0 < x < a
+n = 1, 2, 3, ... (quantum number)`)}
+${makeFormula("Energy Eigenvalues (Quantized!)", `Eₙ = n²π²ℏ²/(2ma²) = n²h²/(8ma²)
+E₁ = π²ℏ²/(2ma²)  (ground state energy)
+E₂ = 4E₁,  E₃ = 9E₁,  E₄ = 16E₁, ...`)}
+<hr class="section-divider">
+<div class="questions-header">Practice Questions <span>6 Qs</span></div>
+${makeQ(1, "Set up and solve the Schrödinger equation for a particle in a 1-D box.",
+  `<p>Inside the box (V=0): TISE → d²ψ/dx² + k²ψ = 0, k = √(2mE)/ℏ</p>
+  <p>General solution: ψ = A·sin(kx) + B·cos(kx)</p>
+  <p>BC1: ψ(0) = 0 → B = 0</p>
+  <p>BC2: ψ(a) = 0 → A·sin(ka) = 0 → ka = nπ → k = nπ/a</p>
+  <p>Wave function: ψₙ(x) = A·sin(nπx/a)</p>
+  <p>Energy: k² = 2mEₙ/ℏ² = n²π²/a² → Eₙ = n²π²ℏ²/(2ma²) = n²h²/(8ma²)</p>
+  <p>Normalization gives A = √(2/a). Final: ψₙ(x) = √(2/a)·sin(nπx/a)</p>`
+)}
+${makeQ(2, "Write the energy eigenvalues for a particle in a 1-D box. Show E₂ = 4E₁.",
+  `<div class="answer-formula">Eₙ = n²π²ℏ²/(2ma²) = n²E₁</div>
+  <p>E₁ = π²ℏ²/(2ma²) (ground state, n=1)</p>
+  <p>E₂ = 4π²ℏ²/(2ma²) = 4E₁ (n=2)</p>
+  <p>E₃ = 9E₁ (n=3), E₄ = 16E₁ (n=4)</p>
+  <p>The energy levels scale as n², with increasing separation between consecutive levels. This discrete spectrum is a direct consequence of the boundary conditions — the quantum confinement.</p>`
+)}
+${makeQ(3, "Derive the normalization constant for the 1-D box.",
+  `<p>Normalization condition: ∫₀ᵃ |ψₙ|² dx = 1</p>
+  <div class="answer-formula">A² ∫₀ᵃ sin²(nπx/a) dx = 1</div>
+  <p>Using sin²θ = (1 − cos2θ)/2:</p>
+  <div class="answer-formula">A² ∫₀ᵃ (1 − cos(2nπx/a))/2 dx = A²[x/2 − sin(2nπx/a)/(4nπ/a)]₀ᵃ</div>
+  <div class="answer-formula">= A² [a/2 − 0] = A²a/2 = 1 → A = √(2/a)</div>`
+)}
+${makeQ(4, "What is the quantum number n? What value can n NOT take and why?",
+  `<p>The quantum number <strong>n = 1, 2, 3, 4, ...</strong> (positive integers only).</p>
+  <p><strong>n cannot be 0</strong>: if n = 0, ψ₀(x) = √(2/a)·sin(0) = 0 everywhere — the wave function vanishes identically, meaning the particle doesn't exist. This is unphysical.</p>
+  <p><strong>n cannot be negative</strong>: sin(−nπx/a) = −sin(nπx/a) gives the same |ψ|² as n > 0 — just an unphysical sign change, not a new physical state.</p>
+  <p>The minimum allowed quantum number is n = 1, corresponding to the <strong>ground state energy E₁ > 0</strong> (zero-point energy).</p>`
+)}
+${makeQ(5, "An electron is confined to a box of length 2 Å. Calculate E₁.",
+  `<p>Given: m = 9.11×10⁻³¹ kg, a = 2×10⁻¹⁰ m, n = 1</p>
+  <div class="answer-formula">E₁ = π²ℏ²/(2ma²) = π²(1.055×10⁻³⁴)²/(2 × 9.11×10⁻³¹ × (2×10⁻¹⁰)²)</div>
+  <div class="answer-formula">= (9.87 × 1.113×10⁻⁶⁸)/(7.29×10⁻⁵⁰) = 1.508×10⁻¹⁸ J = 9.42 eV</div>
+  <p>This is on the order of atomic binding energies — consistent with electrons in atoms being "confined" to atomic-sized regions (~1 Å). The 1-D box is a reasonable first model for atomic systems.</p>`
+)}
+${makeQ(6, "How many nodes does ψₙ have? What is a node?",
+  `<p>A <strong>node</strong> is a point inside the box (excluding the walls) where ψₙ(x) = 0. For ψₙ = √(2/a)·sin(nπx/a), the zeros occur at x = 0, a/n, 2a/n, ..., a — but the walls (x=0 and x=a) are excluded. Therefore: number of interior nodes = <strong>n−1</strong>.</p>
+  <p>n=1 (ground state): 0 nodes. n=2: 1 node (at x=a/2). n=3: 2 nodes (at x=a/3 and 2a/3).</p>
+  <p>Physical significance: more nodes → more oscillations → shorter de Broglie wavelength → higher momentum → higher kinetic energy. Thus nodes directly correlate with energy level.</p>`
+)}
+<div class="topic-nav">
+  <button class="btn-topic-nav" onclick="loadContent('3-6')"><div class="nav-dir">PREV</div><div class="nav-title">← TDSE</div></button>
+  <button class="btn-topic-nav next" onclick="loadContent('4-2')"><div class="nav-dir">NEXT</div><div class="nav-title">Eigenfunction & Energy Quantization →</div></button>
+</div>`;}
+
+function content_4_2() { return makeStubContent("Eigenfunction & Energy Quantization","Module 4 · Applications",
+  ["ψₙ(x) = √(2/a)·sin(nπx/a): the normalized eigenfunctions","Eₙ = n²h²/(8ma²): the discrete (quantized) energy eigenvalues","n = quantum number (positive integer, cannot be 0)","Energy spacing ΔE increases with n: levels spread further apart","As box size a→large: levels crowd together → approaches classical continuum","Energy quantization is a DIRECT consequence of boundary conditions"],
+  [["Energy Levels","E₁ = h²/(8ma²)  (ground state)\nEₙ = n²E₁  (nth level)\nΔE(n→n+1) = (2n+1)E₁  (increases with n)"]],
+  [["Explain why energy is quantized in the particle-in-box problem.","Energy quantization arises from the boundary conditions ψ(0) = ψ(a) = 0. These force sin(ka) = 0, restricting k to discrete values k = nπ/a. Since E = ℏ²k²/2m, only discrete energies Eₙ = n²π²ℏ²/(2ma²) are allowed. In classical physics, no boundary conditions apply to particle energy — any value is allowed. Quantum confinement = energy quantization: this is the fundamental connection."],
+   ["What happens to energy levels as box size a increases?","As a increases: Eₙ = n²h²/(8ma²) → 0 for all n. The energy spacing ΔE = (2n+1)h²/(8ma²) → 0. Levels become infinitely dense, forming a continuous spectrum. This is the classical limit — for macroscopic boxes, energy appears continuous. Bohr's Correspondence Principle: in the limit of large quantum numbers or large systems, quantum results → classical results."],
+   ["Explain the physical meaning of the quantum number n.","The quantum number n (= 1, 2, 3, ...) is the primary quantum number for the 1-D box. It determines: (1) Energy: Eₙ = n²E₁ — higher n means higher energy. (2) Number of nodes: n−1 interior zeros in ψₙ. (3) Wavelength: λₙ = 2a/n — the particle's de Broglie wavelength fits n half-waves in the box. (4) The minimum n=1 corresponds to the ground state (zero-point energy E₁ > 0)."],
+   ["For n=1, where is the most probable location of the particle?","ψ₁(x) = √(2/a)·sin(πx/a). Probability density: |ψ₁|² = (2/a)·sin²(πx/a). Maximum when sin²(πx/a) = 1 → πx/a = π/2 → x = a/2. The most probable location is the <strong>center of the box</strong>. Compare: classically, the particle bounces back and forth uniformly → equal probability everywhere. The quantum ground state is most concentrated in the middle — a distinctly non-classical result."]],
+  "4-1","Particle in a 1-D Box","4-3","Zero Point Energy & Probability Density");}
+
+function content_4_3() { return makeStubContent("Zero Point Energy & Probability Density","Module 4 · Applications",
+  ["Zero Point Energy (ZPE): minimum energy E₁ = π²ℏ²/(2ma²) > 0","ZPE is a consequence of Heisenberg Uncertainty Principle","Cannot have E=0 (that would require Δp=0 → Δx=∞ — particle not in box)","Probability density |ψₙ|² = (2/a)sin²(nπx/a)","For n=1: max probability at x=a/2 (center)","For n=2: zero probability at x=a/2 (node at center)","High n → uniform probability → classical limit (Correspondence Principle)"],
+  [["ZPE & Probability","E_ZPE = E₁ = π²ℏ²/(2ma²)\n|ψₙ(x)|² = (2/a)sin²(nπx/a)\nFor large n: |ψₙ|² → 1/a (uniform, classical result)"]],
+  [["What is Zero Point Energy? Why does it exist?","Zero Point Energy is the minimum non-zero energy E₁ = π²ℏ²/(2ma²) that a confined particle must possess, even at absolute zero temperature. It exists because: If E=0 then p=0 (Δp=0), but the Uncertainty Principle requires ΔxΔp ≥ ℏ/2. With Δx ≤ a (particle is in box), this forces Δp ≥ ℏ/2a > 0 — so the particle cannot have zero momentum → E > 0 always. ZPE is a purely quantum effect with no classical analog."],
+   ["Describe the probability density for n=1 and n=2.", "For n=1: |ψ₁|² = (2/a)sin²(πx/a). Maximum at x=a/2 (center), zero at walls. For n=2: |ψ₂|² = (2/a)sin²(2πx/a). Two maxima at x=a/4 and 3a/4, ZERO at x=a/2 (node at center). Remarkable: at the n=2 energy level, the particle is NEVER found at the box center — even though classically it should pass through there. This is a uniquely quantum interference effect."],
+   ["State and explain the Correspondence Principle for the 1-D box.","As n → ∞: |ψₙ|² = (2/a)sin²(nπx/a) oscillates so rapidly that its average over any finite region → 1/a (uniform). This means for large quantum numbers, the quantum probability distribution approaches the classical result of equal probability everywhere (bouncing back and forth). This is Bohr's Correspondence Principle: quantum mechanics → classical mechanics in the limit of large quantum numbers."],
+   ["Explain why |ψ₂|² = 0 at x = a/2 — a quantum weirdness.", "At x=a/2 for n=2: ψ₂(a/2) = √(2/a)·sin(2π·(a/2)/a) = √(2/a)·sin(π) = 0. Therefore |ψ₂|² = 0. Classically, a particle bouncing between walls passes through x=a/2 — it should be found there 50% of the time. Quantum mechanically, in the n=2 eigenstate, there is ZERO probability of finding the particle at the center. This reflects the wave nature: the standing wave has a node at the center, meaning destructive interference eliminates the probability there."]],
+  "4-2","Eigenfunction & Energy Quantization","4-4","Particle in a 3-D Box & Degeneracy");}
+
+function content_4_4() { return makeStubContent("Particle in a 3-D Box & Degeneracy","Module 4 · Applications",
+  ["3-D box: V=0 for 0<x<a, 0<y<b, 0<z<c","Separation of variables: ψ = X(x)Y(y)Z(z)","E = Eₓ + Eᵧ + E_z = (h²/8m)(nₓ²/a² + nᵧ²/b² + n_z²/c²)","For cubic box a=b=c: Eₙₓₙᵧₙ_z = (h²/8ma²)(nₓ² + nᵧ² + n_z²)","Degeneracy: different (nₓ,nᵧ,n_z) combinations with same E","(2,1,1),(1,2,1),(1,1,2) are 3-fold degenerate — same energy, different states"],
+  [["3-D Box Energy","E = (h²/8m)(nₓ²/a² + nᵧ²/b² + n_z²/c²)\nFor cube (a=b=c): E = (n²h²/8ma²) where n² = nₓ²+nᵧ²+n_z²\nGround state: (1,1,1), E₁₁₁ = 3h²/(8ma²)"]],
+  [["Set up the 3-D box problem and write the energy eigenvalues.","The TISE in 3D separates: X''(x)/X + Y''(y)/Y + Z''(z)/Z + 2mE/ℏ² = 0. Each part is independent: d²X/dx² + kₓ²X = 0, etc. Boundary conditions: X(0)=X(a)=0 → kₓ = nₓπ/a. Similarly for y and z. Energy: E = ℏ²(kₓ²+kᵧ²+k_z²)/2m = h²/(8m)(nₓ²/a²+nᵧ²/b²+n_z²/c²). Wave function: ψ = (2/a)^(3/2)·sin(nₓπx/a)·sin(nᵧπy/a)·sin(n_zπz/a) for a cube."],
+   ["What is degeneracy? Give an example from the 3-D box.","Degeneracy: two or more distinct quantum states (different quantum numbers) with the same energy. For a cubic box: E = (h²/8ma²)(nₓ²+nᵧ²+n_z²). The triplet (2,1,1), (1,2,1), (1,1,2) all give nₓ²+nᵧ²+n_z² = 6, hence the same energy E = 6h²/(8ma²) = 6E₀. These three distinct wavefunctions represent 3-fold degeneracy. Physical consequence: any linear combination of degenerate eigenstates is also an eigenstate with the same energy."],
+   ["What is the ground state energy of a 3-D cubic box?","Ground state: nₓ=nᵧ=n_z=1 (all quantum numbers minimum). E₁₁₁ = h²/(8ma²)(1+1+1) = 3h²/(8ma²) = 3E₁(1D). The 3D ground state energy is 3× the 1D ground state energy — reflecting zero-point energy contributions from all three spatial directions. This non-degeneracy of the ground state (only one way to achieve nₓ²+nᵧ²+n_z²=3) is general: ground states are non-degenerate (in simple potentials)."],
+   ["How does degeneracy relate to symmetry?","Degeneracy is tied to symmetry: for a cubic box (a=b=c), the three quantum numbers (nₓ,nᵧ,n_z) can be permuted while preserving energy → 3-fold degeneracy. If the box is non-cubic (a≠b≠c), the symmetry is broken and the degeneracy is lifted — each (nₓ,nᵧ,n_z) gives a different energy. Generally, higher symmetry → more degeneracy. In atoms, spherical symmetry leads to 2l+1 degeneracy in the magnetic quantum number m_l."]],
+  "4-3","Zero Point Energy & Probability Density","4-5","Quantum Tunneling");}
+
+function content_4_5() { return makeStubContent("Quantum Tunneling","Module 4 · Applications",
+  ["Particle passes through a potential barrier even with E < V₀ (classically impossible)","Tunneling probability T = e^(−2κL), κ = √(2m(V₀−E))/ℏ","T decreases exponentially with barrier width L and height (V₀−E)","Tunneling probability increases: smaller L, smaller (V₀−E), smaller mass m","No classical analog — purely quantum wave phenomenon","Applications: STM, nuclear fusion (solar), α-decay, tunnel diodes, quantum computing"],
+  [["Tunneling Transmission Coefficient","T ≈ e^(−2κL)  (for thick barriers)\nκ = √(2m(V₀−E)) / ℏ\nT increases as: L↓, V₀↓, m↓ (lighter particles tunnel more)"]],
+  [["Explain quantum tunneling. Why is it impossible classically?","Classical physics: a particle with kinetic energy E approaching a potential barrier of height V₀ > E is completely reflected (cannot enter the barrier). Quantum mechanics: the wave function does not abruptly go to zero at the barrier — it decays exponentially inside (Ψ ~ e^(−κx)) but emerges on the other side with small amplitude. The probability of finding the particle on the other side is T = |ψ_transmitted|²/|ψ_incident|² ≠ 0. This purely quantum effect has no classical explanation."],
+   ["Write the tunneling transmission coefficient and state what it depends on.","T ≈ e^(−2κL) where κ = √(2m(V₀−E))/ℏ, L = barrier width. T depends on: (1) Barrier width L — exponential sensitivity. (2) Barrier height above E (V₀−E) — larger gap → smaller T. (3) Particle mass m — heavier particles tunnel exponentially less. Electrons tunnel efficiently; protons less so; macroscopic objects essentially never. This exponential sensitivity to L is exploited in STM for atomic-resolution imaging."],
+   ["Give three real-world applications of quantum tunneling.","(1) Scanning Tunnelling Microscope (STM): tunneling current between tip and surface, exponentially sensitive to tip-surface distance → atomic resolution imaging. (2) Nuclear fusion in stars: protons at solar core temperature (~15 million K) don't classically have enough energy to overcome Coulomb barrier — quantum tunneling enables fusion, powering the Sun. (3) Alpha decay: alpha particle tunnels through nuclear potential barrier — Gamow's tunneling model explains α-decay lifetimes spanning 10⁻⁷ to 10¹⁷ seconds."],
+   ["How does barrier width affect tunneling probability?","T ≈ e^(−2κL) shows exponential dependence on width L. Doubling L: T → T² (squared). For typical κ ~ 10¹⁰ m⁻¹ and L = 1 nm: T ~ e^(−20) ~ 2×10⁻⁹. For L = 0.5 nm: T ~ e^(−10) ~ 4.5×10⁻⁵ — 20,000× larger! In STM: every 0.1 nm increase in tip-surface distance reduces current by ~10× — this extreme sensitivity allows imaging of individual atoms."]],
+  "4-4","Particle in a 3-D Box & Degeneracy","4-6","Scanning Tunnelling Microscope");}
+
+function content_4_6() { return makeStubContent("Scanning Tunnelling Microscope (STM)","Module 4 · Applications",
+  ["STM uses quantum tunneling to image surfaces at atomic resolution","Metal tip brought within ~0.5 nm of conducting surface","Tunneling current I ∝ e^(−2κd) — exponentially sensitive to distance d","Constant current mode: tip height adjusted to keep I constant → surface topography map","Constant height mode: tip scans at fixed height, current variations map surface","Resolution: ~0.1 nm lateral, ~0.01 nm vertical — sees individual atoms"],
+  [["STM Working Principle","I_tunnel ∝ V_bias × e^(−2κd)\nκ = √(2mΦ)/ℏ  (Φ = work function of tip ~4–5 eV)\n10× current change per 0.1 nm distance change"],
+   ["STM Resolution","Lateral resolution: ~0.1 nm (sub-Å)\nVertical resolution: ~0.01 nm\nFirst atomic image: IBM (1981, Binnig & Rohrer → Nobel 1986)"]],
+  [["How does an STM work? Explain its principle of operation.","An STM uses a sharp metal tip (ideally terminated by a single atom) brought within ~0.5 nm of a conducting sample surface. A small bias voltage is applied. Electrons quantum tunnel across the vacuum gap between tip and surface, producing a measurable current I ∝ e^(−2κd). Since T is exponentially sensitive to distance d, even a 0.1 nm change alters I by ~10×. In constant-current mode, a feedback loop adjusts tip height to keep I constant — the recorded height variations directly map the surface atom positions."],
+   ["What gives STM atomic resolution?","STM's atomic resolution comes from two factors: (1) The extreme exponential sensitivity of tunneling current to distance (10× per 0.1 nm) means the single foremost atom of the tip dominates the current — effectively creating an atomic-sized probe. (2) The tunneling current also depends on the local density of electronic states (LDOS) of the surface — allowing imaging of both atomic positions and electronic structure. Together, this gives ~0.1 nm lateral and ~0.01 nm vertical resolution."],
+   ["What are the two operating modes of STM?","(1) Constant Current Mode: feedback circuit adjusts tip-sample distance in real-time to maintain constant tunneling current. The tip height variation directly maps the surface topography. More common — gives true topographic image. (2) Constant Height Mode: tip scans at fixed height; variations in tunneling current are recorded and mapped. Faster (no feedback lag) but risks tip-surface contact on rough surfaces. Used for fast imaging of flat samples."],
+   ["Who invented the STM and when? What was its significance?","The STM was invented by Gerd Binnig and Heinrich Rohrer at IBM Zurich Research Laboratory in 1981. They received the Nobel Prize in Physics in 1986 (shared with Ernst Ruska, inventor of electron microscope). Significance: (1) First instrument to image individual atoms in real space. (2) Revolutionized surface science and nanotechnology. (3) Spawned the entire field of scanning probe microscopy (AFM, etc.). (4) Demonstrated a practical quantum effect for room-temperature technology."]],
+  "4-5","Quantum Tunneling","5-1","Introduction & Classical vs Quantum Bits");}
+
+/* --- MODULE 5 --- */
+function content_5_1() { return makeStubContent("Introduction & Classical vs Quantum Bits","Module 5 · Quantum Computing",
+  ["Classical bit: 0 or 1 (definite state)","Qubit: |ψ⟩ = α|0⟩ + β|1⟩ — superposition of 0 AND 1","|α|² + |β|² = 1 (normalization)","n qubits: 2ⁿ complex amplitudes simultaneously — exponential parallelism","Quantum advantage: certain problems (factoring, search) solved exponentially faster","Quantum decoherence: biggest practical challenge"],
+  [["Qubit vs Classical Bit","Classical: bit ∈ {0, 1} (definite)\nQubit: |ψ⟩ = α|0⟩ + β|1⟩, |α|²+|β|²=1\nMeasurement → collapses to |0⟩ (prob |α|²) or |1⟩ (prob |β|²)\nn qubits: 2ⁿ amplitudes (vs 2ⁿ states for classical)"]],
+  [["What is a qubit? How does it differ from a classical bit?","A classical bit is definitively either 0 or 1. A qubit (quantum bit) can be in a superposition: |ψ⟩ = α|0⟩ + β|1⟩, where α,β are complex numbers with |α|²+|β|²=1. Before measurement, the qubit is simultaneously '0 and 1.' Upon measurement: result is |0⟩ with probability |α|² or |1⟩ with probability |β|². The extra dimension (complex amplitudes) and superposition give quantum computers their power."],
+   ["What is quantum parallelism?","n qubits can exist in a superposition of all 2ⁿ computational basis states simultaneously: |ψ⟩ = Σ cₓ|x⟩ over all n-bit strings x. Applying a quantum gate U to this superposition transforms all 2ⁿ states in ONE operation: U|ψ⟩ = Σ cₓ U|x⟩. This is quantum parallelism — equivalent to performing 2ⁿ classical computations simultaneously. However, measuring the result collapses to ONE outcome — the art of quantum algorithms is to design interference patterns that amplify the correct answer."],
+   ["What makes quantum computers potentially faster than classical ones?","Quantum speedup comes from: (1) Superposition (quantum parallelism — exponentially many states). (2) Quantum interference — amplifying correct answers, canceling wrong ones. (3) Entanglement — correlations between qubits with no classical analog. Examples of speedups: Shor's algorithm (1994): factoring N-digit numbers in O(n³) vs classical O(e^(n^(1/3))) — exponential speedup. Grover's algorithm (1996): search unsorted database in O(√N) vs classical O(N) — quadratic speedup."],
+   ["What is decoherence and why is it the main challenge?","Decoherence: quantum superpositions are destroyed by interactions with the environment. Even a single stray photon or vibration can collapse a qubit state, losing quantum information. Typical coherence times: superconducting qubits ~100 μs; trapped ions ~minutes. Classical operations take nanoseconds, but quantum operations must be completed within coherence time. Error correction codes require ~1000 physical qubits per 1 logical qubit. Maintaining coherence in large systems is the primary engineering challenge of quantum computing."]],
+  "4-6","Scanning Tunnelling Microscope","5-2","Single Qubit & Bloch Sphere");}
+
+function content_5_2() { return makeStubContent("Single Qubit & Bloch Sphere","Module 5 · Quantum Computing",
+  ["Qubit: |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩","Bloch sphere: unit sphere, every point = a pure qubit state","North pole: |0⟩, South pole: |1⟩, Equator: equal superpositions","θ: polar angle (0 to π), φ: azimuthal angle (0 to 2π)","Single-qubit gates = rotations of the Bloch sphere","Measurement collapses to north or south pole"],
+  [["Bloch Sphere Parametrization","|ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩\nNorth pole (θ=0): |0⟩\nSouth pole (θ=π): |1⟩\nEquator (θ=π/2): |±⟩=(|0⟩±|1⟩)/√2, |±i⟩=(|0⟩±i|1⟩)/√2"]],
+  [["What is the Bloch sphere? How does it represent a qubit?","The Bloch sphere is a unit sphere in 3D space where every point on the surface represents a pure qubit state. Parametrization: |ψ⟩ = cos(θ/2)|0⟩ + e^(iφ)sin(θ/2)|1⟩, with polar angle θ ∈ [0,π] and azimuthal angle φ ∈ [0,2π]. North pole: |0⟩. South pole: |1⟩. Equatorial plane: equal superpositions. This geometric picture makes single-qubit gate operations visual — each gate is a rotation of the Bloch sphere."],
+   ["Where are |+⟩ and |−⟩ on the Bloch sphere?","|+⟩ = (|0⟩+|1⟩)/√2 and |−⟩ = (|0⟩−|1⟩)/√2 are the eigenstates of σₓ. On the Bloch sphere: θ=π/2 (equator), φ=0 for |+⟩ (positive x-axis) and φ=π for |−⟩ (negative x-axis). Similarly, |+i⟩ and |−i⟩ (σᵧ eigenstates) lie on the ±y axis of the equator. This correspondence: Bloch sphere axis ↔ Pauli matrix eigenstates."],
+   ["Why can a qubit be represented on a sphere (not a circle)?","A general qubit is |ψ⟩ = α|0⟩+β|1⟩ with |α|²+|β|²=1, so (α,β) ∈ complex unit sphere S³. However, overall global phase e^(iγ) is unphysical (not measurable). This reduces the parameter space: after fixing global phase, one real freedom is θ (ratio |α|/|β|) and one is φ (relative phase between α and β). Two real parameters → 2D surface = Bloch sphere. The sphere captures all physically distinguishable single-qubit states."],
+   ["How do single-qubit gates act on the Bloch sphere?","Every single-qubit unitary U acts as a rotation of the Bloch sphere. General form: U = e^(iα)Rₙ(θ) = e^(iα)e^(−iθ(n̂·σ⃗)/2), a rotation by angle θ about axis n̂. Examples: X gate (σₓ): 180° rotation about x-axis (bit flip |0⟩↔|1⟩). Z gate (σ_z): 180° rotation about z-axis (phase flip). H gate: 90° rotation about y-axis then 180° about x-axis. This geometric picture makes circuit design intuitive."]],
+  "5-1","Introduction & Classical vs Quantum Bits","5-3","Two Qubits & Entanglement");}
+
+function content_5_3() { return makeStubContent("Two Qubits & Entanglement","Module 5 · Quantum Computing",
+  ["Two-qubit state: 4-dimensional Hilbert space, basis {|00⟩,|01⟩,|10⟩,|11⟩}","Product state: |ψ⟩ = |ψ_A⟩⊗|ψ_B⟩ — separable, no correlations","Entangled: NOT expressible as tensor product — non-classical correlations","Measurement on one qubit instantly affects the other (non-local)","Entanglement is a resource for quantum computing and communication","Bell states: maximally entangled two-qubit states"],
+  [["Two-Qubit State Space","|ψ⟩ = c₀₀|00⟩ + c₀₁|01⟩ + c₁₀|10⟩ + c₁₁|11⟩\n|c₀₀|²+|c₀₁|²+|c₁₀|²+|c₁₁|² = 1\nProduct state: (α|0⟩+β|1⟩)⊗(γ|0⟩+δ|1⟩) = αγ|00⟩+αδ|01⟩+βγ|10⟩+βδ|11⟩"]],
+  [["What is the tensor product of two qubit states?","For qubit A in |ψ_A⟩=α|0⟩+β|1⟩ and qubit B in |ψ_B⟩=γ|0⟩+δ|1⟩, the combined state is the tensor product: |ψ_A⟩⊗|ψ_B⟩ = αγ|00⟩+αδ|01⟩+βγ|10⟩+βδ|11⟩. This is a product (separable) state — the qubits are independent. The full 2-qubit Hilbert space is 4-dimensional. n qubits → 2ⁿ-dimensional Hilbert space."],
+   ["Define entanglement. Give an example of an entangled state.","Two qubits are entangled if their joint state CANNOT be written as |ψ_A⟩⊗|ψ_B⟩. Example: |Φ+⟩ = (|00⟩+|11⟩)/√2. Suppose this were separable: (α|0⟩+β|1⟩)(γ|0⟩+δ|1⟩) = αγ|00⟩+αδ|01⟩+βγ|10⟩+βδ|11⟩. This requires αδ=0 AND βγ=0. But then either αγ=0 or βδ=0 — cannot have both |00⟩ and |11⟩ terms. Contradiction → state is entangled."],
+   ["What are the physical consequences of entanglement?","If qubits A and B are in |Φ+⟩ = (|00⟩+|11⟩)/√2 and A is measured: with 50% probability A collapses to |0⟩, and B INSTANTLY collapses to |0⟩; or A→|1⟩ and B→|1⟩. The correlation is perfect, regardless of the distance between A and B. This non-local correlation has no classical explanation (proven by Bell's theorem). It enables: quantum teleportation, quantum cryptography (BB84), superdense coding, and quantum computation."],
+   ["How is entanglement created experimentally?","Entanglement cannot be created by local operations on separate qubits — it requires a quantum gate that acts jointly on multiple qubits. The standard method: apply Hadamard (H) to qubit A (creating superposition), then CNOT with A as control, B as target: H|0⟩ = (|0⟩+|1⟩)/√2 → CNOT → (|00⟩+|11⟩)/√2 = |Φ+⟩ (Bell state). Physical implementations: parametric down-conversion (photons), two-qubit gates in superconducting or trapped-ion systems."]],
+  "5-2","Single Qubit & Bloch Sphere","5-4","Bell States");}
+
+function content_5_4() { return makeStubContent("Bell States","Module 5 · Quantum Computing",
+  ["Four maximally entangled two-qubit states — form a complete orthonormal basis","|Φ+⟩ = (|00⟩+|11⟩)/√2, |Φ-⟩ = (|00⟩−|11⟩)/√2","|Ψ+⟩ = (|01⟩+|10⟩)/√2, |Ψ-⟩ = (|01⟩−|10⟩)/√2","Any two-qubit state can be expanded in Bell basis","Bell states are resource for quantum teleportation and superdense coding","Created by H gate + CNOT gate circuit"],
+  [["Bell States","Φ+ = (|00⟩+|11⟩)/√2  ← standard entangled state\nΦ− = (|00⟩−|11⟩)/√2\nΨ+ = (|01⟩+|10⟩)/√2  ← spin-0 singlet analog\nΨ− = (|01⟩−|10⟩)/√2  ← spin singlet"]],
+  [["Write all four Bell states. What makes them special?","The four Bell states are: |Φ±⟩=(|00⟩±|11⟩)/√2 and |Ψ±⟩=(|01⟩±|10⟩)/√2. They are special because: (1) Maximally entangled: each qubit is completely mixed (50/50) when measured alone. (2) Complete orthonormal basis for 2-qubit space: ⟨Φ+|Φ-⟩=0, ⟨Φ+|Ψ±⟩=0, etc. (3) Any 2-qubit state can be expanded in this basis. (4) They are related by simple Pauli operations on one qubit."],
+   ["How is the Bell state |Φ+⟩ created from |00⟩?","Circuit: (1) Apply H to qubit A: |00⟩ → (|0⟩+|1⟩)/√2 ⊗ |0⟩ = (|00⟩+|10⟩)/√2. (2) Apply CNOT with A=control, B=target: |00⟩→|00⟩, |10⟩→|11⟩. Result: (|00⟩+|11⟩)/√2 = |Φ+⟩. This H+CNOT circuit is the universal Bell state generator. Starting from |01⟩, |10⟩, |11⟩ gives |Ψ+⟩, |Φ-⟩, |Ψ-⟩ respectively."],
+   ["What is quantum teleportation? How do Bell states enable it?","Quantum teleportation transmits a qubit state |ψ⟩ = α|0⟩+β|1⟩ from Alice to Bob using: (1) A shared Bell pair |Φ+⟩ between Alice and Bob. (2) Alice performs Bell measurement on her qubit + the qubit to teleport → gets one of 4 results. (3) Alice sends 2 classical bits to Bob. (4) Bob applies corresponding Pauli correction (I, X, Z, or XZ) to his qubit → recovers |ψ⟩. The qubit state is teleported without sending the physical qubit. Note: no faster-than-light communication (classical bits still needed)."],
+   ["Explain superdense coding using Bell states.","Superdense coding: Alice sends 2 classical bits using 1 qubit, by exploiting entanglement. (1) Alice and Bob share |Φ+⟩. (2) Alice encodes 2 bits by applying one of {I, X, Z, iY} to her qubit: 00→|Φ+⟩, 01→|Ψ+⟩, 10→|Φ-⟩, 11→|Ψ-⟩. (3) Alice sends her qubit to Bob. (4) Bob performs Bell measurement → identifies which of the 4 Bell states → recovers 2 bits. Two classical bits of information transmitted by sending one qubit — the entangled resource doubled the communication capacity."]],
+  "5-3","Two Qubits & Entanglement","5-5","Single Qubit Gates");}
+
+function content_5_5() { return makeStubContent("Single Qubit Gates (Pauli, Hadamard)","Module 5 · Quantum Computing",
+  ["All single-qubit gates are 2×2 unitary matrices","X gate (NOT): |0⟩↔|1⟩ (bit flip), matrix = σₓ","Y gate: |0⟩→i|1⟩, |1⟩→−i|0⟩, matrix = σᵧ","Z gate (phase flip): |0⟩→|0⟩, |1⟩→−|1⟩, matrix = σ_z","H gate (Hadamard): |0⟩→|+⟩, |1⟩→|−⟩ — creates superposition","H creates equal superposition: H|0⟩=(|0⟩+|1⟩)/√2 — essential for QC"],
+  [["Gate Matrices","X = [[0,1],[1,0]]  (bit flip)\nZ = [[1,0],[0,−1]] (phase flip)\nH = (1/√2)[[1,1],[1,−1]] (Hadamard)\nY = [[0,−i],[i,0]]  (both flips)"]],
+  [["Write the Pauli gates and describe their action on qubits.","X gate (Pauli-X, NOT gate): X|0⟩=|1⟩, X|1⟩=|0⟩. Matrix [[0,1],[1,0]]. Classical NOT. Y gate (Pauli-Y): Y|0⟩=i|1⟩, Y|1⟩=−i|0⟩. Matrix [[0,−i],[i,0]]. Both bit and phase flip. Z gate (Pauli-Z, phase flip): Z|0⟩=|0⟩, Z|1⟩=−|1⟩. Matrix [[1,0],[0,−1]]. Leaves |0⟩ unchanged, flips sign of |1⟩. All are self-inverse (X²=Y²=Z²=𝟙) and Hermitian."],
+   ["Derive the Hadamard gate and show H|0⟩ and H|1⟩.","H = (1/√2)[[1,1],[1,−1]]. Action: H|0⟩ = (1/√2)(|0⟩+|1⟩) = |+⟩. H|1⟩ = (1/√2)(|0⟩−|1⟩) = |−⟩. H creates an equal superposition from |0⟩ or |1⟩. Properties: H† = H (Hermitian), H² = 𝟙 (self-inverse), HXH = Z, HZH = X. H is the single most important gate in quantum computing — it creates the superpositions that enable quantum parallelism."],
+   ["Show that all Pauli gates are both Hermitian and unitary.","For X: X† = (X*)ᵀ = [[0,1],[1,0]]ᵀ = [[0,1],[1,0]] = X → Hermitian. X†X = X² = [[1,0],[0,1]] = 𝟙 → Unitary. Same argument holds for Y and Z (with appropriate complex conjugates). For H: H† = H (real, symmetric matrix — so Hermitian), H² = 𝟙 → Unitary. Being both Hermitian and unitary means: eigenvalues are ±1, and the gate is its own inverse."],
+   ["What is the S gate and T gate?","S gate (phase gate): S = [[1,0],[0,i]] — applies 90° phase to |1⟩. S|0⟩=|0⟩, S|1⟩=i|1⟩. T gate (π/8 gate): T = [[1,0],[0,e^(iπ/4)]] — applies 45° phase to |1⟩. Significance: {H, T, CNOT} is a universal gate set — any quantum computation can be approximated to arbitrary accuracy using these three gates. S = T², Z = S² = T⁴. The T gate is essential for fault-tolerant quantum computing."]],
+  "5-4","Bell States","5-6","Two Qubit Gates & CNOT");}
+
+function content_5_6() { return makeStubContent("Two Qubit Gates & CNOT","Module 5 · Quantum Computing",
+  ["CNOT: Control qubit determines if target qubit is flipped","CNOT|00⟩=|00⟩, |01⟩=|01⟩, |10⟩=|11⟩, |11⟩=|10⟩","CNOT matrix: 4×4 unitary (permutation matrix)","H+CNOT creates entanglement from separable states","CNOT is universal for quantum computing (with single-qubit gates)","SWAP gate exchanges two qubits (SWAP = CNOT·CNOT·CNOT)"],
+  [["CNOT Gate","CNOT = [[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]] (in |00⟩,|01⟩,|10⟩,|11⟩ basis)\nAction: |c,t⟩ → |c, t⊕c⟩  (target XOR control)\nCNOT†=CNOT (Hermitian & unitary → CNOT²=𝟙)"]],
+  [["Define the CNOT gate and write its truth table.","CNOT (Controlled-NOT): a two-qubit gate with control qubit c and target qubit t. Action: flip target iff control is |1⟩. Truth table: |00⟩→|00⟩, |01⟩→|01⟩, |10⟩→|11⟩, |11⟩→|10⟩. In shorthand: |c,t⟩→|c,t⊕c⟩ where ⊕ is XOR. CNOT is the quantum analog of classical XOR. It is the most important two-qubit gate and, together with single-qubit gates, forms a universal quantum gate set."],
+   ["Show that H+CNOT creates a Bell state from |00⟩.","Step 1: Apply H to control (qubit 1): H|0⟩=(|0⟩+|1⟩)/√2, so |00⟩ → (|0⟩+|1⟩)/√2 ⊗|0⟩ = (|00⟩+|10⟩)/√2. Step 2: Apply CNOT: CNOT(|00⟩+|10⟩)/√2 = (|00⟩+|11⟩)/√2 = |Φ+⟩. The CNOT created entanglement — the two qubits are now correlated. Before CNOT, the state was a product state (separable). After CNOT, it is maximally entangled. This is why CNOT is essential: it generates entanglement, which is the key quantum resource."],
+   ["What is a universal gate set in quantum computing?","A universal gate set is a finite set of quantum gates from which any quantum circuit (any unitary transformation) can be approximated to arbitrary accuracy. Example universal sets: {H, T, CNOT}, {H, S, CNOT}, {H, T, S, CNOT}. 'Universal' means: for any n-qubit unitary U and error ε, there exists a circuit C from these gates with ||U−C|| < ε. Classical analog: {NAND} is universal for classical computation. The existence of a universal quantum gate set is what makes quantum computers programmable."],
+   ["How is the SWAP gate implemented using CNOT gates?","The SWAP gate exchanges two qubits: SWAP|ψ_A⟩|ψ_B⟩ = |ψ_B⟩|ψ_A⟩. SWAP = CNOT_{A→B} · CNOT_{B→A} · CNOT_{A→B} (three CNOT gates in sequence, alternating control and target). Verification: Apply to |10⟩: CNOT(A→B)|10⟩=|11⟩ → CNOT(B→A)|11⟩=|01⟩ → CNOT(A→B)|01⟩=|01⟩. ✓ This decomposition shows that SWAP can be implemented using only CNOT gates — important for hardware with limited qubit connectivity."]],
+  "5-5","Single Qubit Gates (Pauli, Hadamard)", null);}
+
+/* ===================== STATE ===================== */
+let studied = [];
+try { studied = JSON.parse(localStorage.getItem('qm_studied') || '[]'); } catch(e) { studied = []; }
+let currentTopicId = null;
+
+function updateProgress() {
+  const total = MODULES.reduce((sum, m) => sum + m.topics.length, 0);
+  const pct = Math.round((studied.length / total) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function toggleStudied() {
+  if (!currentTopicId) return;
+  const btn = document.getElementById('markBtn');
+  if (studied.includes(currentTopicId)) {
+    studied = studied.filter(id => id !== currentTopicId);
+    btn.textContent = '✓ Mark studied';
+    btn.classList.remove('marked');
+  } else {
+    studied.push(currentTopicId);
+    btn.textContent = '✓ Studied!';
+    btn.classList.add('marked');
+  }
+  try { localStorage.setItem('qm_studied', JSON.stringify(studied)); } catch(e) {}
+  updateProgress();
+  renderModuleGrid();
+}
+
+/* ===================== RENDER ===================== */
+function renderModuleGrid() {
+  const grid = document.getElementById('modulesGrid');
+  grid.innerHTML = MODULES.map(mod => {
+    const studiedCount = mod.topics.filter(t => studied.includes(t.id)).length;
+    const topicsHTML = mod.topics.map(t => {
+      const done = studied.includes(t.id);
+      return `<li class="topic-item ${done?'studied':''}" onclick="loadContent('${t.id}')">
+        <span class="topic-dot"></span>
+        <span>${t.title}</span>
+        <span class="topic-arrow">→</span>
+      </li>`;
+    }).join('');
+    return `<div class="module-card" id="mod-${mod.id}" onclick="toggleModule(${mod.id}, event)">
+      <div class="module-header">
+        <span class="module-num">M0${mod.id}</span>
+        <div class="module-info">
+          <div class="module-title">${mod.title}</div>
+          <div class="module-meta"><span>${mod.hours}</span><span>${studiedCount}/${mod.topics.length} done</span></div>
+        </div>
+        <svg class="module-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
+      </div>
+      <div class="module-topics">
+        <ul class="topic-list">${topicsHTML}</ul>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleModule(id, e) {
+  if (e.target.closest('.topic-item')) return;
+  const card = document.getElementById(`mod-${id}`);
+  const isActive = card.classList.contains('active');
+  document.querySelectorAll('.module-card.active').forEach(c => c.classList.remove('active'));
+  if (!isActive) card.classList.add('active');
+}
+
+function findTopic(id) {
+  for (const mod of MODULES) {
+    const t = mod.topics.find(t => t.id === id);
+    if (t) return {topic: t, mod};
+  }
+  return null;
+}
+
+function loadContent(topicId) {
+  const found = findTopic(topicId);
+  if (!found) return;
+  const {topic, mod} = found;
+  currentTopicId = topicId;
+
+  document.getElementById('home-view').style.display = 'none';
+  const panel = document.getElementById('content-panel');
+  panel.classList.add('visible');
+
+  document.getElementById('breadcrumb').innerHTML =
+    `<span>M0${mod.id} ${mod.title}</span><span class="sep">›</span><span class="current">${topic.title}</span>`;
+
+  const markBtn = document.getElementById('markBtn');
+  if (studied.includes(topicId)) {
+    markBtn.textContent = '✓ Studied!';
+    markBtn.classList.add('marked');
+  } else {
+    markBtn.textContent = '✓ Mark studied';
+    markBtn.classList.remove('marked');
+  }
+
+  document.getElementById('contentBody').innerHTML = topic.content();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+
+  panel.className = '';
+  void panel.offsetWidth;
+  panel.className = 'visible';
+}
+
+function goHome() {
+  currentTopicId = null;
+  document.getElementById('home-view').style.display = 'block';
+  document.getElementById('content-panel').classList.remove('visible');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+  renderModuleGrid();
+}
+
+function toggleAnswer(btn) {
+  const card = btn.closest('.question-card');
+  const panel = card.querySelector('.answer-panel');
+  const visible = panel.classList.contains('visible');
+  panel.classList.toggle('visible', !visible);
+  btn.textContent = visible ? '▶ Show Answer' : '▼ Hide Answer';
+  btn.classList.toggle('revealed', !visible);
+}
+
+/* ===================== INIT ===================== */
+renderModuleGrid();
+updateProgress();
+</script>
+</body>
+</html>
